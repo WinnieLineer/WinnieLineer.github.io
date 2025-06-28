@@ -4,8 +4,6 @@ date: 2025-06-28
 description: A step-by-step guide to using GoDaddy, ImprovMX, and GitHub Pages to create a custom domain email and personal website with zero hosting fees.
 ---
 
-# How to Set Up Your Own Domain, Email, and Website for Free
-
 Want your own domain, a custom email like `hi@yourdomain.com`, and a professional-looking website—all without paying for web hosting? This guide walks you through everything from domain purchase to email forwarding and site deployment using free tools.
 
 ---
