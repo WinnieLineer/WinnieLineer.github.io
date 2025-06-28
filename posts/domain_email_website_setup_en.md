@@ -2,6 +2,7 @@
 title: How to Set Up Your Own Domain, Email, and Website for Free
 date: 2025-06-28
 description: A step-by-step guide to using GoDaddy, ImprovMX, and GitHub Pages to create a custom domain email and personal website with zero hosting fees.
+tags: [Web Development, Domain Setup, Email Configuration, GitHub Pages, Free Hosting, DNS Configuration, Tutorial, Personal Branding]
 ---
 
 Want your own domain, a custom email like `hi@yourdomain.com`, and a professional-looking website—all without paying for web hosting? This guide walks you through everything from domain purchase to email forwarding and site deployment using free tools.
@@ -13,7 +14,7 @@ Want your own domain, a custom email like `hi@yourdomain.com`, and a professiona
 Use a registrar like [GoDaddy](https://www.godaddy.com/) to buy a domain. It's beginner-friendly and offers low first-year prices. A few tips:
 
 - Renewal cost increases significantly after the first year
-- Disable **auto-renewal** if you don’t plan to keep it
+- Disable **auto-renewal** if you don't plan to keep it
 
 ---
 
@@ -60,13 +61,13 @@ Add a CNAME record:
 
 ## 🔒 Step 5: Enable HTTPS
 
-GitHub Pages will auto-generate an SSL certificate. Go to Settings → Pages and enable “Enforce HTTPS.”
+GitHub Pages will auto-generate an SSL certificate. Go to Settings → Pages and enable "Enforce HTTPS."
 
 ---
 
 ## ✅ Wrap-up
 
-You’ve now successfully:
+You've now successfully:
 - ✅ Registered a custom domain
 - ✅ Set up a free email forwarder
 - ✅ Hosted your own website
