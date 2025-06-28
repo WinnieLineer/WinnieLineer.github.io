@@ -1,9 +1,13 @@
 {
   "posts": [
     {
-      "filename": "microservices-spring-boot.md",
-      "path": "/posts/microservices-spring-boot.md"
+      "filename": "domain_email_website_setup.md",
+      "path": "/posts/domain_email_website_setup.md"
+    },
+    {
+      "filename": "domain_email_website_setup_en.md",
+      "path": "/posts/domain_email_website_setup_en.md"
     }
   ],
-  "lastUpdated": "2025-06-28T12:00:31.702Z"
+  "lastUpdated": "2025-06-28T12:17:04.449Z"
 }
