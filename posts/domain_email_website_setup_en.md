@@ -1,111 +1,126 @@
 ---
-title: How to Set Up Your Own Domain, Email, and Website for Free
+title: Set Up Your Own Domain, Email, and Website (for just NT\$37!)
 date: 2025-06-28
-description: A step-by-step guide to using GoDaddy, ImprovMX, and GitHub Pages to create a custom domain email and personal website with zero hosting fees.
-tags: [Web Development, Domain Setup, Email Configuration, GitHub Pages, Free Hosting, DNS Configuration, Tutorial, Personal Branding]
+description: Get your own domain email and website set up with just NT\$37 using GoDaddy, ImprovMX, Gmail, and GitHub Pages. Super beginner-friendly! 
+tags: [Domain Setup, Email, GitHub Pages, Personal Branding, Website Hosting, DNS]
 ---
 
-Want your own domain, a custom email like `hi@yourdomain.com`, and a professional-looking website—all without paying for web hosting? This guide walks you through everything from domain purchase to email forwarding and site deployment using free tools.
+Yup, you're not dreaming. For the price of a latte, you can:
+
+- Own a custom domain (like `winnie-lin.space`)
+- Send and receive email using that domain (like `hi@winnie-lin.space`)
+- Host a personal website (for free!)
+
+No monthly hosting fee. No complicated tech knowledge required. Just follow these chill steps:
 
 ---
 
-## Step 1: Buy a Domain
+## Step 1: Buy a Domain (NT\$37 Deal!)
 
-Use a registrar like [GoDaddy](https://www.godaddy.com/) to buy a domain. It's beginner-friendly and offers low first-year prices. A few tips:
+Go to [GoDaddy](https://www.godaddy.com/) and search for a `.space` domain—like `winnie-lin.space`. First-year price is usually NT\$37!
 
-- Renewal cost increases significantly after the first year
-- Disable **auto-renewal** if you don't plan to keep it
-- Bookmark the DNS settings page—you'll likely return to it multiple times during setup
+> ⚠️ Heads-up: Renewal price jumps after the first year. You can disable **auto-renew** if you're just testing the waters.
+
+Also, after buying, bookmark the **DNS Settings** page. You'll need it soon.
 
 ---
 
 ## Step 2: Free Email Forwarding with ImprovMX
 
-### 2.1 Register at [improvmx.com](https://improvmx.com)
-- Add your domain (e.g., `yourdomain.com`)
-- Set your destination email (e.g., Gmail)
+### Register on [improvmx.com](https://improvmx.com)
 
-By doing this, you can receive emails sent to your custom domain directly in your Gmail inbox.
+- Add your domain `winnie-lin.space`
+- Forward mail to your Gmail (or other mailbox)
 
-### 2.2 Update DNS Records in GoDaddy
-Add the following DNS records:
+### Update DNS on GoDaddy
 
-- **MX Record 1**
-  - Type: MX
-  - Name: @
-  - Value: `mx1.improvmx.com`
-  - Priority: 10
+Add these records:
 
-- **MX Record 2**
-  - Type: MX
-  - Name: @
-  - Value: `mx2.improvmx.com`
-  - Priority: 20
+- **MX Record**: `mx1.improvmx.com` (priority 10)
+- **MX Record**: `mx2.improvmx.com` (priority 20)
+- **TXT Record (SPF)**: `v=spf1 include:improvmx.com include:_spf.google.com ~all`
 
-- **TXT Record (SPF)**
-  - Type: TXT
-  - Name: @
-  - Value: `v=spf1 include:improvmx.com include:_spf.google.com ~all`
-
-**Why this matters:**
-- **MX (Mail Exchange) records** determine where emails for your domain should be delivered. Lower numbers have higher priority—so emails will first attempt to deliver via `mx1.improvmx.com`; if that fails, `mx2.improvmx.com` will be used.
-- **TXT/SPF records** help verify that mail sent from your domain is legitimate, reducing the chance it ends up in spam or gets blocked.
----
-
-## Step 3: Host a Free Website with GitHub Pages
-
-### 3.1 Create a GitHub Repository
-- Name it `Blog`, `Site`, or anything meaningful
-
-### 3.2 Upload Your Site
-- Use static files (like HTML/CSS) or a site generator such as Jekyll, VitePress, or Astro
-- *(I'll create another guide to walk through site generators step by step)*
-
-### 3.3 Enable GitHub Pages
-- Go to **Settings → Pages** in your repository
-- Select the branch and folder to publish from
-- GitHub will give you a public URL like `https://yourusername.github.io/yourrepo/`
+This makes sure you can **receive** emails sent to `hi@winnie-lin.space`.
 
 ---
 
-## Step 4: Connect a Custom Domain
+## Step 3: Send Email as `hi@winnie-lin.space` from Gmail
 
-### 4.1 Add a `CNAME` File to Your Repo
-In your deployed site folder (usually root or `docs`), add a file named `CNAME`:
+Want to **send** mail using your domain too? Here's how:
+
+1. Open Gmail → Settings → See all settings → Accounts and Import
+2. Under **"Send mail as"**, click **"Add another email address"**
+3. Name: Anything
+4. Email: `hi@winnie-lin.space`
+5. SMTP server: `smtp.improvmx.com`, Port: `587`
+6. Username: `hi@winnie-lin.space`, Password: (from ImprovMX)
+
+Done! You can now choose `hi@winnie-lin.space` when composing emails.
+
+---
+
+## Step 4: Build a Free Website with GitHub Pages
+
+### Create a GitHub Repo
+
+- Name it `blog` or `portfolio`
+- Upload your static site (HTML, CSS) or use generators like VitePress, Astro, or Jekyll
+
+### Enable GitHub Pages
+
+- Go to **Repo Settings → Pages**
+- Choose source branch & folder
+- GitHub gives you a public URL like `https://yourusername.github.io/blog/`
+
+---
+
+## Step 5: Connect to `blog.winnie-lin.space`
+
+### Add a CNAME file
+
+In your project’s root folder:
+
 ```
-blog.yourdomain.com
+blog.winnie-lin.space
 ```
 
-### 4.2 Update GoDaddy DNS
-Add a CNAME record:
+### Update DNS in GoDaddy
+
+Add a CNAME Record:
+
 - Name: `blog`
 - Value: `yourusername.github.io`
 
-**Why this matters:**
-- The `CNAME` record tells DNS to point your custom domain (e.g., `blog.yourdomain.com`) to your GitHub Pages site.
-- Without it, your browser won’t know how to resolve your domain to the GitHub-hosted site.
+This links `blog.winnie-lin.space` to your GitHub-hosted site.
 
 ---
 
-## Step 5: Enable HTTPS
+## Step 6: Enable HTTPS
 
-GitHub Pages will automatically issue an SSL certificate for your custom domain. Just:
-- Go to **Settings → Pages**
-- Enable **"Enforce HTTPS"**
+GitHub handles SSL for you:
 
-**Why this matters:**
-- HTTPS encrypts communication between your site and your visitors
-- It boosts credibility, improves SEO, and ensures your site isn’t flagged as “Not Secure” by browsers
+- Go to **Repo Settings → Pages**
+- Check **"Enforce HTTPS"**
+
+Secure, credible, and browser-safe.
 
 ---
 
-## Wrap-up
+## Wrap-up: You Did It!
 
-You've now successfully:
-- ✅ Registered a custom domain
-- ✅ Set up a free email forwarder
-- ✅ Hosted your own website
-- ✅ Connected your domain to GitHub Pages
-- ✅ Secured your site with HTTPS
+Let’s recap. You now:
 
-This setup is ideal for developers, freelancers, and job seekers. You can now own your personal brand online—with no hosting cost at all!
+- ✅ Bought a custom domain for NT\$37
+- ✅ Set up Gmail-compatible email with your domain
+- ✅ Hosted a free website
+- ✅ Linked it to your custom domain
+- ✅ Secured everything with HTTPS
+
+Ready to show off your personal brand like a boss?
+
+Share your site, send your resume from your fancy new email, and enjoy being the tech-savvy superstar you are.
+
+---
+
+Still confused? Want help using VitePress, Astro, or writing blog posts? Stay tuned for part 2!
+
