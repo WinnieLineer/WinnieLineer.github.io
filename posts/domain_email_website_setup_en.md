@@ -1,5 +1,5 @@
 ---
-title: Set Up Your Own Domain, Email, and Website (for just NT\$37!)
+title: Set Up Your Own Domain, Email, and Website (for just NT$37!)
 date: 2025-06-28
 description: Get your own domain email and website set up with just NT\$37 using GoDaddy, ImprovMX, Gmail, and GitHub Pages. Super beginner-friendly! 
 tags: [Domain Setup, Email, GitHub Pages, Personal Branding, Website Hosting, DNS]
