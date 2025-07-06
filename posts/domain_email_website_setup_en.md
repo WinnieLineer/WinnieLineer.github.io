@@ -53,7 +53,7 @@ Want to **send** mail using your domain too? Here's how:
 3. Name: Anything
 4. Email: `hi@winnie-lin.space`
 5. SMTP server: `smtp.improvmx.com`, Port: `587`
-6. Username: `hi@winnie-lin.space`, Password: (from ImprovMX)
+6. Username: `your gamil account`, Password: (your gamil password)
 
 Done! You can now choose `hi@winnie-lin.space` when composing emails.
 

@@ -1,27 +1,27 @@
 ---
-title: 用 NT\$37 擁有自己的網域、信箱與個人網站
+title: 用 NT$37 擁有自己的網域、信箱與個人網站
 date: 2025-06-28
 description: 教你用超佛價格（只要 NT$37！）快速建立自有網域、信箱轉寄、自架網站，完全適合新手，無需寫程式！ 
 tags: [網域設定, 信箱轉寄, GitHub Pages, 個人品牌, 網頁架站, DNS 教學]
 ---
 
-沒錯你沒看錯，只要一杯手搖的價格，就能：
+和大家分享, 只要一杯手搖的價格，就能：
 
 - 擁有個人網域（像 `winnie-lin.space`）
 - 使用自己的信箱收信寄信（像 `hi@winnie-lin.space`）
 - 架設個人網站（完全免費）
 
-每月不用繳主機費，流程簡單，保證新手也能快速上手：
+不用繳主機費，流程簡單，保證新手也能快速上手：
 
 ---
 
-## 第一步：購買網域（首年只要 NT\$37）
+## 第一步：購買網域（首年只要 NT$37）
 
-前往 [GoDaddy](https://www.godaddy.com/)，搜尋 `.space` 網域，例如 `winnie-lin.space`，通常首年只要 NT\$37！
+前往 [GoDaddy](https://www.godaddy.com/)，搜尋 `.space` 網域，例如 `winnie-lin.space`，通常首年只要 NT$37！
 
 > ⚠️ 注意：續約價格會跳漲，若只是想先試試水溫，建議關閉自動續約。
 
-購買後記得把「DNS 設定頁面」加書籤，接下來會用到。
+購買後記得把「DNS 設定頁面」加書籤，之後若要改DNS設定會很常用到。
 
 ---
 
@@ -36,9 +36,9 @@ tags: [網域設定, 信箱轉寄, GitHub Pages, 個人品牌, 網頁架站, DNS
 
 新增以下紀錄：
 
-- **MX 紀錄**：`mx1.improvmx.com`（優先順序 10）
+- **MX 紀錄**：`mx1.improvmx.com`（優先順序 10）意思是 ➡️ 所有寄到你網域（例如 winnie-lin.space）的信，都會被導向 ImprovMX 的郵件伺服器。
 - **MX 紀錄**：`mx2.improvmx.com`（優先順序 20）
-- **TXT/SPF**：`v=spf1 include:improvmx.com include:_spf.google.com ~all`
+- **TXT/SPF**：`v=spf1 include:improvmx.com include:_spf.google.com ~all` v=spf1 是指定版本固定寫法, 這紀錄意思是improvmx.com 和 _spf.google.com 郵件伺服器有權使用我的網域寄信, ~all則是非以上郵件伺服器則軟拒絕
 
 這樣設定好之後，你就可以接收到寄到 `hi@winnie-lin.space` 的郵件囉！
 
@@ -52,8 +52,8 @@ tags: [網域設定, 信箱轉寄, GitHub Pages, 個人品牌, 網頁架站, DNS
 2. 找到「以其他地址寄信」→ 點「新增其他電子郵件地址」
 3. 名稱隨便填（例如 Winnie）
 4. 電子郵件：`hi@winnie-lin.space`
-5. SMTP 伺服器：`smtp.improvmx.com`，Port：587
-6. 使用者名稱：`hi@winnie-lin.space`，密碼：從 ImprovMX 取得
+5. SMTP 伺服器：`smtp.gmail.com`，Port：587
+6. 使用者名稱：你的gmail帳號，密碼：你的gmail密碼
 
 完成後，你在 Gmail 發信時就能選擇這個漂亮的寄件人信箱囉！
 
@@ -108,7 +108,7 @@ GitHub Pages 會自動幫你產生 SSL 憑證，只要：
 
 ## 總結：你完成了這些！
 
-- ✅ 買到 NT\$37 超便宜網域
+- ✅ 買到 NT$37 超便宜網域
 - ✅ 設定好收信與 Gmail 寄信
 - ✅ 架好免費網站
 - ✅ 綁定網域 + HTTPS 安全憑證
