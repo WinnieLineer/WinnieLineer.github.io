@@ -1,5 +1,4 @@
 import { Link } from 'react-router-dom';
-import React from 'react';
 
 // The article content is defined as a JSX element for rich formatting
 const articleContent = (
