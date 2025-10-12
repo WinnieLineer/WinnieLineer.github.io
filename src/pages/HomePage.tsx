@@ -1,4 +1,4 @@
-import { Hero3D } from '../components/Hero3D';
+import { useState } from 'react';
 
 // --- Data for the resume content ---
 const experiences = [
@@ -49,13 +49,54 @@ const experiences = [
 
 const skills = ['Kotlin', 'Java', 'Spring Boot', 'Ktor', 'PostgreSQL', 'Oracle SQL', 'MySQL', 'Redis', 'Kafka', 'Vue.js', 'AngularJS', 'Microservices', 'CI/CD'];
 
+// --- Hero Component with Magnetic Text Effect ---
+const Hero = () => {
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = (e.clientX - rect.left - rect.width / 2) / (rect.width / 2);
+    const y = (e.clientY - rect.top - rect.height / 2) / (rect.height / 2);
+    setMousePosition({ x, y });
+  };
+
+  const handleMouseLeave = () => {
+    setMousePosition({ x: 0, y: 0 });
+  };
+
+  const textStyle = {
+    transform: `translate(${mousePosition.x * 10}px, ${mousePosition.y * 10}px) scale(${1 + Math.abs(mousePosition.x * 0.05) + Math.abs(mousePosition.y * 0.05)})`,
+    transition: 'transform 0.1s ease-out',
+    textShadow: `
+      ${-mousePosition.x * 5}px ${-mousePosition.y * 5}px 10px rgba(138, 43, 226, 0.3),
+      ${mousePosition.x * 5}px ${mousePosition.y * 5}px 10px rgba(0, 255, 249, 0.3)
+    `
+  };
+
+  return (
+    <div 
+      className="flex flex-col items-center justify-center text-center h-full text-white p-8"
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+    >
+      <h1 className="text-6xl md:text-8xl font-extrabold tracking-wider" style={textStyle}>
+        Shi Ting Lin
+      </h1>
+      <p className="mt-4 text-lg md:text-xl text-gray-400">
+        Senior Software Engineer
+      </p>
+    </div>
+  );
+};
+
+
 // --- Main Page Component ---
 export const HomePage = () => {
   return (
     <div>
-      {/* Section 1: The immersive 3D hero scene */}
-      <section style={{ height: '100vh', position: 'relative' }}>
-        <Hero3D />
+      {/* Section 1: The immersive hero scene */}
+      <section style={{ height: '100vh', position: 'relative', background: 'radial-gradient(ellipse 80% 80% at 50% -20%,rgba(120,119,198,0.3),hsla(0,0%,100%,0))' }}>
+        <Hero />
         {/* The animated scroll-down indicator */}
         <div className="scroll-down-indicator"></div>
       </section>

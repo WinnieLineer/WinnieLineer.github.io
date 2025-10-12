@@ -1,29 +1,11 @@
 import { useEffect } from 'react';
-import { BrowserRouter, Routes, Route, useLocation, useNavigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Navbar } from './components/Navbar';
 import { HomePage } from './pages/HomePage';
 import { PostsPage } from './pages/PostsPage';
 import { PostDetailPage } from './pages/PostDetailPage';
 
-const basename = import.meta.env.DEV ? '/' : '/winnie-lin.space/';
-
-// This component handles the redirect logic from the 404.html page.
-const RedirectHandler = () => {
-  const location = useLocation();
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    const params = new URLSearchParams(location.search);
-    const redirectPath = params.get('p');
-
-    if (redirectPath) {
-      // Navigate to the correct path and replace the history entry.
-      navigate(redirectPath, { replace: true });
-    }
-  }, [location, navigate]);
-
-  return null; // This component does not render anything.
-};
+// No longer need a dynamic basename. The relative paths will handle everything.
 
 function App() {
   // This effect is for the cursor glow.
@@ -43,8 +25,8 @@ function App() {
   }, []);
 
   return (
-    <BrowserRouter basename={basename}>
-      <RedirectHandler /> {/* Add the handler to the app */}
+    // Use BrowserRouter without a basename prop.
+    <BrowserRouter>
       <Navbar />
       <Routes>
         <Route path="/" element={<HomePage />} />
