@@ -5,7 +5,8 @@ import react from '@vitejs/plugin-react';
 export default defineConfig(({ command }) => {
   return {
     plugins: [react()],
-    // Set the base path for GitHub Pages deployment
+    // This is the crucial part for GitHub Pages deployment.
+    // It tells Vite that all assets should be loaded relative to this path.
     base: command === 'build' ? '/winnie-lin.space/' : '/',
   };
 });

@@ -1,0 +1,30 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Redirecting...</title>
+    <script>
+      // Get the current path from the URL.
+      const path = window.location.pathname;
+
+      // If the path is not the root, redirect to the root with the path as a query parameter.
+      // This allows the client-side router to handle it.
+      if (path !== '/' && path !== '/winnie-lin.space/') {
+        const newPath = '/winnie-lin.space/?p=' + path.replace('/winnie-lin.space', '');
+        window.location.href = newPath;
+      }
+    </script>
+  </head>
+  <body>
+    <p>If you are not redirected automatically, follow this <a id="redirect-link" href="#">link</a>.</p>
+    <script>
+      // Fallback link for browsers with JavaScript disabled (less likely, but good practice).
+      const link = document.getElementById('redirect-link');
+      if (link) {
+        const path = window.location.pathname;
+        const newPath = '/winnie-lin.space/?p=' + path.replace('/winnie-lin.space', '');
+        link.setAttribute('href', newPath);
+      }
+    </script>
+  </body>
+</html>
