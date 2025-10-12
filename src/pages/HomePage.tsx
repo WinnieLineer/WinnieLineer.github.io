@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useRef, useEffect } from 'react';
+import { Hero3D } from '../components/Hero3D';
 
 // --- Data for the resume content ---
 const experiences = [
@@ -49,72 +50,57 @@ const experiences = [
 
 const skills = ['Kotlin', 'Java', 'Spring Boot', 'Ktor', 'PostgreSQL', 'Oracle SQL', 'MySQL', 'Redis', 'Kafka', 'Vue.js', 'AngularJS', 'Microservices', 'CI/CD'];
 
-// --- Hero Component with Magnetic Text Effect ---
-const Hero = () => {
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
-
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    const x = (e.clientX - rect.left - rect.width / 2) / (rect.width / 2);
-    const y = (e.clientY - rect.top - rect.height / 2) / (rect.height / 2);
-    setMousePosition({ x, y });
-  };
-
-  const handleMouseLeave = () => {
-    setMousePosition({ x: 0, y: 0 });
-  };
-
-  const textStyle = {
-    transform: `translate(${mousePosition.x * 10}px, ${mousePosition.y * 10}px) scale(${1 + Math.abs(mousePosition.x * 0.05) + Math.abs(mousePosition.y * 0.05)})`,
-    transition: 'transform 0.1s ease-out',
-    textShadow: `
-      ${-mousePosition.x * 5}px ${-mousePosition.y * 5}px 10px rgba(138, 43, 226, 0.3),
-      ${mousePosition.x * 5}px ${mousePosition.y * 5}px 10px rgba(0, 255, 249, 0.3)
-    `
-  };
-
-  return (
-    <div 
-      className="flex flex-col items-center justify-center text-center h-full text-white p-8"
-      onMouseMove={handleMouseMove}
-      onMouseLeave={handleMouseLeave}
-    >
-      <h1 className="text-6xl md:text-8xl font-extrabold tracking-wider" style={textStyle}>
-        Shi Ting Lin
-      </h1>
-      <p className="mt-4 text-lg md:text-xl text-gray-400">
-        Senior Software Engineer
-      </p>
-    </div>
-  );
-};
-
-
 // --- Main Page Component ---
 export const HomePage = () => {
+  const profileRef = useRef<HTMLDivElement>(null);
+  const experienceRef = useRef<HTMLDivElement>(null);
+  const skillsRef = useRef<HTMLDivElement>(null);
+  const contactRef = useRef<HTMLDivElement>(null);
+
+  const handlePanelClick = (section: string) => {
+    let ref;
+    switch (section) {
+      case 'profile': ref = profileRef; break;
+      case 'experience': ref = experienceRef; break;
+      case 'skills': ref = skillsRef; break;
+      case 'contact': ref = contactRef; break;
+      default: ref = null;
+    }
+    ref?.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  };
+
+  useEffect(() => {
+    const hasScrolled = sessionStorage.getItem('hasScrolled');
+    if (!hasScrolled) {
+      setTimeout(() => {
+        window.scrollTo({ top: 100, behavior: 'smooth' });
+        setTimeout(() => {
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }, 900);
+        sessionStorage.setItem('hasScrolled', 'true');
+      }, 2500);
+    }
+  }, []);
+
   return (
     <div>
-      {/* Section 1: The immersive hero scene */}
-      <section style={{ height: '100vh', position: 'relative', background: 'radial-gradient(ellipse 80% 80% at 50% -20%,rgba(120,119,198,0.3),hsla(0,0%,100%,0))' }}>
-        <Hero />
-        {/* The animated scroll-down indicator */}
-        <div className="scroll-down-indicator"></div>
+      <section style={{ height: '100vh', position: 'relative' }}>
+        <Hero3D onPanelClick={handlePanelClick} />
+        {/* Set a higher z-index to ensure it's visible on top of the 3D scene */}
+        <div className="scroll-down-indicator" style={{ zIndex: 10 }}></div>
       </section>
 
-      {/* Section 2: The scrollable resume content */}
-      <section className="relative bg-[#111111] py-24 px-8">
+      <section className="relative py-24 px-8">
         <div className="max-w-3xl mx-auto space-y-16">
 
-          {/* Profile Section with hover effect */}
-          <div className="p-8 bg-black/20 border border-white/10 rounded-2xl card-hover-glow">
+          <div ref={profileRef} className="p-8 bg-black/20 border border-white/10 rounded-2xl card-hover-glow">
             <h3 className="text-3xl font-bold text-center mb-6 text-violet-300">Profile</h3>
             <p className="text-lg text-gray-300 leading-relaxed text-center">
               Experienced backend engineer with expertise in Kotlin, Java, and cloud-based microservices. Actively seeking opportunities in Singapore and open to relocation. Require employer sponsored work visa.
             </p>
           </div>
 
-          {/* Experience Section with hover effect */}
-          <div className="p-8 bg-black/20 border border-white/10 rounded-2xl card-hover-glow">
+          <div ref={experienceRef} className="p-8 bg-black/20 border border-white/10 rounded-2xl card-hover-glow">
             <h3 className="text-3xl font-bold text-center mb-12 text-violet-300">Experience</h3>
             <div className="relative pl-8">
               <div className="absolute left-8 top-2 bottom-2 w-0.5 bg-white/10"></div>
@@ -134,25 +120,23 @@ export const HomePage = () => {
             </div>
           </div>
 
-          {/* Education & Skills Grid with hover effect */}
-          <div className="grid md:grid-cols-2 gap-8">
-              <div className="p-8 bg-black/20 border border-white/10 rounded-2xl text-center card-hover-glow">
-                  <h3 className="text-3xl font-bold mb-4 text-violet-300">Education</h3>
-                  <h4 className="text-xl font-semibold text-white">National Central University</h4>
-                  <p className="text-md text-gray-400">Bachelor of Business Administration (BBA), Information Management</p>
-                  <p className="text-sm text-gray-500">Sep 2014 – Jun 2018</p>
-              </div>
+          <div ref={skillsRef} className="p-8 bg-black/20 border border-white/10 rounded-2xl card-hover-glow">
+            <h3 className="text-3xl font-bold mb-4 text-center text-violet-300">Skills</h3>
+            <div className="flex flex-wrap justify-center gap-3">
+              {skills.map(skill => (
+                <span key={skill} className="bg-white/10 text-violet-300 text-sm font-medium px-4 py-2 rounded-full">
+                  {skill}
+                </span>
+              ))}
+            </div>
+          </div>
 
-              <div className="p-8 bg-black/20 border border-white/10 rounded-2xl card-hover-glow">
-                <h3 className="text-3xl font-bold mb-4 text-center text-violet-300">Skills</h3>
-                <div className="flex flex-wrap justify-center gap-3">
-                  {skills.map(skill => (
-                    <span key={skill} className="bg-white/10 text-violet-300 text-sm font-medium px-4 py-2 rounded-full">
-                      {skill}
-                    </span>
-                  ))}
-                </div>
-              </div>
+          <div ref={contactRef} className="p-8 bg-black/20 border border-white/10 rounded-2xl card-hover-glow text-center">
+            <h3 className="text-3xl font-bold mb-6 text-violet-300">Contact</h3>
+            <p className="text-lg text-gray-300">I'm currently open to new opportunities.</p>
+            <a href="mailto:hi@winnie-lin.space" className="mt-4 inline-block text-xl text-violet-300 hover:text-white transition-colors">
+              hi@winnie-lin.space
+            </a>
           </div>
 
         </div>
