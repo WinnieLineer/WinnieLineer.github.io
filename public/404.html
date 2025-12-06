@@ -9,9 +9,13 @@
 
       // If the path is not the root, redirect to the root with the path as a query parameter.
       // This allows the client-side router to handle it.
-      if (path !== '/' && path !== '/winnie-lin.space/') {
-        const newPath = '/winnie-lin.space/?p=' + path.replace('/winnie-lin.space', '');
-        window.location.href = newPath;
+      if (path !== '/') {
+        // For custom domains, 'winnie-lin.space' treats '/' as the root.
+        // We preserve query parameters and hash if they exist.
+        const search = window.location.search;
+        const hash = window.location.hash;
+        const newPath = '/?p=' + path + (search ? '&q=' + search.slice(1).replace(/&/g, '~and~') : '') + hash;
+        window.location.replace(newPath);
       }
     </script>
   </head>
@@ -22,8 +26,12 @@
       const link = document.getElementById('redirect-link');
       if (link) {
         const path = window.location.pathname;
-        const newPath = '/winnie-lin.space/?p=' + path.replace('/winnie-lin.space', '');
-        link.setAttribute('href', newPath);
+        const search = window.location.search;
+        const hash = window.location.hash;
+        if (path !== '/') {
+             const newPath = '/?p=' + path + (search ? '&q=' + search.slice(1).replace(/&/g, '~and~') : '') + hash;
+             link.setAttribute('href', newPath);
+        }
       }
     </script>
   </body>
