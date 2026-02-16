@@ -9,6 +9,13 @@ const projects = [
     tags: ['Finance', 'Data Visualization', 'AI', 'Real-time API'],
   },
   {
+    title: 'Dawnguard',
+    description: 'An AI-powered counseling chatbot themed around Tanjiro Kamado. Provides empathetic, supportive interactions to promote mental well-being in a comforting, familiar character voice.',
+    image: '/portfolio/dawnguard.png',
+    url: 'https://winnie-lin.space/dawnguard/',
+    tags: ['Mental Health', 'Chatbot', 'Anime'],
+  },
+  {
     title: 'Focus Flow',
     description: 'A productivity PWA featuring strict session management and distraction penalties. Designed with a premium glassmorphism UI, smooth SVG animations, and comprehensive stats tracking to enhance focus consistency.',
     image: '/portfolio/focus-flow.png',
@@ -28,13 +35,6 @@ const projects = [
     image: '/portfolio/pomodoro.png',
     url: 'https://winnie-lin.space/Pomodoro/',
     tags: ['Productivity', 'Time Management'],
-  },
-  {
-    title: 'Dawnguard',
-    description: 'An AI-powered counseling chatbot themed around Tanjiro Kamado. Provides empathetic, supportive interactions to promote mental well-being in a comforting, familiar character voice.',
-    image: '/portfolio/dawnguard.png',
-    url: 'https://winnie-lin.space/dawnguard/',
-    tags: ['Mental Health', 'Chatbot', 'Anime'],
   },
   {
     title: 'DreamScape',
@@ -91,13 +91,22 @@ export const PortfolioPage = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {projects.map((project, index) => {
             const isFeatured = index === 0;
+            const isSecondaryFeatured = index === 1;
+            
+            let colSpanClass = '';
+            if (isFeatured) {
+              colSpanClass = 'md:col-span-2 lg:col-span-3';
+            } else if (isSecondaryFeatured) {
+              colSpanClass = 'md:col-span-2 lg:col-span-2';
+            }
+
             return (
               <a 
                 href={project.url} 
                 key={index} 
                 target="_blank" 
                 rel="noopener noreferrer" 
-                className={`block group relative ${isFeatured ? 'md:col-span-2 lg:col-span-3' : ''} animate-fade-in-up`}
+                className={`block group relative ${colSpanClass} animate-fade-in-up`}
                 style={{ animationDelay: `${index * 100}ms` }}
               >
                 <div 
