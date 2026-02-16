@@ -28,6 +28,9 @@ export const Navbar = () => {
           <NavLink to="/posts" className={linkClass}>
             Posts
           </NavLink>
+          <NavLink to="/portfolio" className={linkClass}>
+            Portfolio
+          </NavLink>
         </div>
       </div>
     </nav>

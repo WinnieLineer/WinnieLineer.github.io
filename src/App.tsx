@@ -3,6 +3,7 @@ import { Navbar } from './components/Navbar';
 import { HomePage } from './pages/HomePage';
 import { PostsPage } from './pages/PostsPage';
 import { PostDetailPage } from './pages/PostDetailPage';
+import { PortfolioPage } from './pages/PortfolioPage';
 import { CursorGlow } from './components/CursorGlow';
 
 function App() {
@@ -13,6 +14,7 @@ function App() {
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/posts" element={<PostsPage />} />
+        <Route path="/portfolio" element={<PortfolioPage />} />
         {/* The route now uses a slug parameter, which is the most robust and SEO-friendly method */}
         <Route path="/posts/:slug" element={<PostDetailPage />} />
       </Routes>
