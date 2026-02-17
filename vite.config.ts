@@ -4,7 +4,7 @@ import react from '@vitejs/plugin-react';
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
-  // Use an empty string for the base to generate relative asset paths.
-  // This is the most robust solution for deploying to a subdirectory.
-  base: '',
+  // Use '/' as the base to generate absolute paths from the domain root.
+  // This ensures assets load correctly regardless of the URL path.
+  base: '/',
 });

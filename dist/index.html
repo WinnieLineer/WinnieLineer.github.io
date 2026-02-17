@@ -2,17 +2,45 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-      <link rel="apple-touch-icon" sizes="180x180" href="./assets/apple-touch-icon-CYXumxEY.png">
-      <link rel="icon" type="image/png" href="./assets/favicon-96x96-Co8Z1-Au.png" sizes="96x96" />
-      <link rel="icon" type="image/svg+xml" href="./assets/favicon-D18HDNnc.svg" />
-      <link rel="shortcut icon" href="./assets/favicon-xqKBeEfe.ico" />
-      <link rel="apple-touch-icon" sizes="180x180" href="./assets/apple-touch-icon-CYXumxEY.png" />
+      <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+      <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
+      <link rel="icon" type="image/png" href="/favicon.png" />
+      <link rel="shortcut icon" href="/favicon.png" />
       <meta name="apple-mobile-web-app-title" content="Winine Lin" />
-      <link rel="manifest" href="./assets/site-Dr2-xEgf.webmanifest" />
+      <link rel="manifest" href="/assets/site-Dr2-xEgf.webmanifest" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Shi Ting Lin | Senior Software Engineer</title>
-    <script type="module" crossorigin src="./assets/index-BO0CQL02.js"></script>
-    <link rel="stylesheet" crossorigin href="./assets/index-GDA8Cif7.css">
+    <script type="text/javascript">
+      // Single Page Apps for GitHub Pages
+      // MIT License
+      // https://github.com/rafrex/spa-github-pages
+      // This script checks to see if a redirect is present in the query string,
+      // converts it back into the correct url and adds it to the
+      // browser's history using window.history.replaceState(...),
+      // which won't cause the browser to attempt to load the new url.
+      // When the single page app is loaded further down in this file,
+      // the correct url will be waiting in the browser's history for
+      // the single page app to route accordingly.
+      (function(l) {
+        if (l.search[1] === '/' ) {
+          var decoded = l.search.slice(1).split('&').map(function(s) {
+            return s.replace(/~and~/g, '&')
+          }).join('?');
+          window.history.replaceState(null, null,
+              l.pathname.slice(0, -1) + decoded + l.hash
+          );
+        }
+        // Our 404.html forwards to /?p=/path
+        // We need to check for p param
+        const params = new URLSearchParams(l.search);
+        const path = params.get('p');
+        if (path) {
+            window.history.replaceState(null, null, path + l.hash);
+        }
+      }(window.location))
+    </script>
+    <script type="module" crossorigin src="/assets/index-BR3rT48J.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-CAR5Fy4T.css">
   </head>
   <body>
     <div id="root"></div>
