@@ -8,7 +8,7 @@ const projects = [
     image: '/portfolio/asset-insights.png',
     url: 'https://winnie-lin.space/asset-insights/',
     tags: ['Finance', 'AI', 'Real-time'],
-    year: '2024'
+    year: '2026'
   },
   {
     title: 'Dawnguard',
@@ -16,7 +16,7 @@ const projects = [
     image: '/portfolio/dawnguard.png',
     url: 'https://winnie-lin.space/dawnguard/',
     tags: ['Mental Health', 'Chatbot', 'Anime'],
-    year: '2024'
+    year: '2026'
   },
   {
     title: 'Focus Flow',
@@ -24,7 +24,7 @@ const projects = [
     image: '/portfolio/focus-flow.png',
     url: 'https://winnie-lin.space/focus-flow/',
     tags: ['Productivity', 'PWA', 'Focus'],
-    year: '2023'
+    year: '2025'
   },
   {
     title: 'Lofi Music',
@@ -32,7 +32,7 @@ const projects = [
     image: '/portfolio/lofi-music.png',
     url: 'https://winnie-lin.space/LofiMusic/',
     tags: ['Music', 'Relaxation', 'Audio'],
-    year: '2023'
+    year: '2025'
   },
   {
     title: 'Pomodoro',
@@ -40,7 +40,7 @@ const projects = [
     image: '/portfolio/pomodoro.png',
     url: 'https://winnie-lin.space/Pomodoro/',
     tags: ['Productivity', 'Time Management'],
-    year: '2023'
+    year: '2025'
   },
   {
     title: 'DreamScape',
@@ -48,7 +48,7 @@ const projects = [
     image: '/portfolio/dreamscape.png',
     url: 'https://winnie-lin.space/DreamScape/',
     tags: ['Animation', 'Demo', 'Game'],
-    year: '2022'
+    year: '2024'
   },
   {
     title: 'BPTracker',
@@ -56,7 +56,7 @@ const projects = [
     image: '/portfolio/bptracker.png',
     url: 'https://winnie-lin.space/BPTracker/',
     tags: ['Health', 'OCR', 'AI'],
-    year: '2022'
+    year: '2024'
   },
 ];
 
@@ -68,7 +68,7 @@ export const PortfolioPage = () => {
       <div className="container mx-auto">
         <div className="flex justify-between items-baseline mb-24">
           <h1 className="text-7xl font-light text-white uppercase tracking-widest">Projects</h1>
-          <div className="text-gray-500 font-mono text-sm">(Selected Works 2022–2024)</div>
+          <div className="text-gray-500 font-mono text-sm">(Selected Works 2024–2026)</div>
         </div>
 
         <div className="relative">
@@ -112,7 +112,7 @@ export const PortfolioPage = () => {
         />
         
         <div className="mt-32 border-t border-white/5 pt-12 flex justify-between text-gray-600 font-mono text-xs uppercase tracking-[0.3em]">
-          <span>© 2024 Shiting Lin</span>
+          <span>© 2026 Shiting Lin</span>
           <span>Built for the future_</span>
         </div>
       </div>
