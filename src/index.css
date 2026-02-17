@@ -33,6 +33,54 @@
   /* --- Card Hover Glow Effect --- */
   .card-hover-glow { @apply relative transition-all duration-300; }
   .card-hover-glow:hover { transform: translateY(-4px); box-shadow: 0 0 15px 5px rgba(138, 43, 226, 0.2); border-color: rgba(138, 43, 226, 0.4); }
+
+  /* --- Project List Styles --- */
+  .project-list-item {
+    @apply relative border-b border-white/10 py-10 transition-colors duration-500 cursor-none;
+  }
+  .project-list-item:hover {
+    @apply border-white/30;
+  }
+  .project-list-item .project-title {
+    @apply text-6xl md:text-8xl font-black uppercase tracking-tighter text-transparent transition-all duration-500;
+    -webkit-text-stroke: 1px rgba(255, 255, 255, 0.2);
+  }
+  .project-list-item:hover .project-title {
+    @apply text-white;
+    -webkit-text-stroke: 1px rgba(255, 255, 255, 1);
+  }
+  .project-list-item .project-meta {
+    @apply absolute right-0 top-1/2 -translate-y-1/2 text-right opacity-30 transition-opacity duration-300;
+  }
+  .project-list-item:hover .project-meta {
+    @apply opacity-100;
+  }
+
+  /* --- Floating Preview --- */
+  .floating-preview {
+    @apply pointer-events-none fixed z-[100] w-[400px] h-[250px] overflow-hidden opacity-0 scale-75 transition-all duration-500 ease-out;
+    transform-origin: center center;
+  }
+  .floating-preview.active {
+    @apply opacity-100 scale-100;
+  }
+  .floating-preview img {
+    @apply w-full h-full object-cover grayscale brightness-50 transition-all duration-700;
+  }
+  .project-list-item:hover ~ .floating-preview img,
+  .floating-preview.active img {
+    @apply grayscale-0 brightness-100;
+  }
+  
+  /* --- Scanning Line Effect --- */
+  .scan-line {
+    @apply absolute inset-0 w-full h-1 bg-violet-500/30 blur-sm pointer-events-none z-10;
+    animation: scan 3s linear infinite;
+  }
+  @keyframes scan {
+    0% { transform: translateY(-100%); }
+    100% { transform: translateY(400%); }
+  }
 }
 
 /* --- Keyframes --- */

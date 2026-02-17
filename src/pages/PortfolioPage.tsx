@@ -1,154 +1,119 @@
-
+import { useState } from 'react';
+import { ProjectHoverPreview } from '../components/ProjectHoverPreview';
 
 const projects = [
   {
     title: 'Asset Insights',
-    description: 'An advanced asset tracking dashboard featuring automatic asset classification, real-time stock price updates, and dynamic rendering of historical asset value bar charts. Integrated with AI-driven financial advisory for personalized investment insights.',
+    description: 'An advanced asset tracking dashboard featuring automatic asset classification, real-time stock price updates, and dynamic rendering of historical asset value bar charts.',
     image: '/portfolio/asset-insights.png',
     url: 'https://winnie-lin.space/asset-insights/',
-    tags: ['Finance', 'Data Visualization', 'AI', 'Real-time API'],
+    tags: ['Finance', 'AI', 'Real-time'],
+    year: '2024'
   },
   {
     title: 'Dawnguard',
-    description: 'An AI-powered counseling chatbot themed around Tanjiro Kamado. Provides empathetic, supportive interactions to promote mental well-being in a comforting, familiar character voice.',
+    description: 'An AI-powered counseling chatbot themed around Tanjiro Kamado. Provides empathetic, supportive interactions.',
     image: '/portfolio/dawnguard.png',
     url: 'https://winnie-lin.space/dawnguard/',
     tags: ['Mental Health', 'Chatbot', 'Anime'],
+    year: '2024'
   },
   {
     title: 'Focus Flow',
-    description: 'A productivity PWA featuring strict session management and distraction penalties. Designed with a premium glassmorphism UI, smooth SVG animations, and comprehensive stats tracking to enhance focus consistency.',
+    description: 'A productivity PWA featuring strict session management and distraction penalties. Designed with a premium glassmorphism UI.',
     image: '/portfolio/focus-flow.png',
     url: 'https://winnie-lin.space/focus-flow/',
     tags: ['Productivity', 'PWA', 'Focus'],
+    year: '2023'
   },
   {
     title: 'Lofi Music',
-    description: 'An immersive Lofi music player paired with calming, atmospheric visuals. Distinctively designed to create a relaxing environment for coding, studying, or unwinding.',
+    description: 'An immersive Lofi music player paired with calming, atmospheric visuals.',
     image: '/portfolio/lofi-music.png',
     url: 'https://winnie-lin.space/LofiMusic/',
     tags: ['Music', 'Relaxation', 'Audio'],
+    year: '2023'
   },
   {
     title: 'Pomodoro',
-    description: 'A minimalist Pomodoro timer designed to optimize workflow and manage time effectively. Adheres to the classic technique for sustained productivity without distractions.',
+    description: 'A minimalist Pomodoro timer designed to optimize workflow and manage time effectively.',
     image: '/portfolio/pomodoro.png',
     url: 'https://winnie-lin.space/Pomodoro/',
     tags: ['Productivity', 'Time Management'],
+    year: '2023'
   },
   {
     title: 'DreamScape',
-    description: 'A visually striking interactive 3D demo resembling a high-quality game title sequence. Showcases advanced animation techniques and immersive web graphics capabilities.',
+    description: 'A visually striking interactive 3D demo resembling a high-quality game title sequence.',
     image: '/portfolio/dreamscape.png',
     url: 'https://winnie-lin.space/DreamScape/',
     tags: ['Animation', 'Demo', 'Game'],
+    year: '2022'
   },
   {
     title: 'BPTracker',
-    description: 'A health monitoring app utilizing OCR for automated blood pressure and weight logging. Features AI-powered analysis to provide actionable health insights and daily trend tracking.',
+    description: 'A health monitoring app utilizing OCR for automated blood pressure and weight logging.',
     image: '/portfolio/bptracker.png',
     url: 'https://winnie-lin.space/BPTracker/',
-    tags: ['Health', 'OCR', 'AI', 'Analytics'],
+    tags: ['Health', 'OCR', 'AI'],
+    year: '2022'
   },
 ];
 
 export const PortfolioPage = () => {
+  const [activeProject, setActiveProject] = useState<{ image: string; title: string } | null>(null);
+
   return (
-    <div className="min-h-screen p-8 pt-32">
+    <div className="min-h-screen p-8 pt-32 bg-[#111111]">
       <div className="container mx-auto">
-        <h1 className="text-5xl font-bold mb-12 text-center text-white animate-fade-in-down">My Portfolio</h1>
-        
-        <style>{`
-          @keyframes fadeInDown {
-            from {
-              opacity: 0;
-              transform: translate3d(0, -20px, 0);
-            }
-            to {
-              opacity: 1;
-              transform: translate3d(0, 0, 0);
-            }
-          }
-          @keyframes fadeInUp {
-            from {
-              opacity: 0;
-              transform: translate3d(0, 40px, 0);
-            }
-            to {
-              opacity: 1;
-              transform: translate3d(0, 0, 0);
-            }
-          }
-          .animate-fade-in-down {
-            animation: fadeInDown 0.8s ease-out forwards;
-          }
-          .animate-fade-in-up {
-            animation: fadeInUp 0.8s ease-out forwards;
-            opacity: 0; 
-          }
-        `}</style>
+        <div className="flex justify-between items-baseline mb-24">
+          <h1 className="text-7xl font-light text-white uppercase tracking-widest">Projects</h1>
+          <div className="text-gray-500 font-mono text-sm">(Selected Works 2022–2024)</div>
+        </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {projects.map((project, index) => {
-            const isFeatured = index === 0;
-            const isSecondaryFeatured = index === 1;
-            
-            let colSpanClass = '';
-            if (isFeatured) {
-              colSpanClass = 'md:col-span-2 lg:col-span-3';
-            } else if (isSecondaryFeatured) {
-              colSpanClass = 'md:col-span-2 lg:col-span-2';
-            }
-
-            return (
-              <a 
-                href={project.url} 
-                key={index} 
-                target="_blank" 
-                rel="noopener noreferrer" 
-                className={`block group relative ${colSpanClass} animate-fade-in-up`}
-                style={{ animationDelay: `${index * 100}ms` }}
-              >
-                <div 
-                  className={`
-                    glass-morphism h-full transition-all duration-500 ease-out 
-                    group-hover:border-white/40 group-hover:shadow-[0_0_30px_rgba(139,92,246,0.3)] 
-                    transform group-hover:-translate-y-2 flex flex-col overflow-hidden
-                    ${isFeatured ? 'lg:flex-row' : ''}
-                  `}
-                >
-                  <div className={`overflow-hidden ${isFeatured ? 'lg:w-3/5 h-64 lg:h-auto' : 'h-48'}`}>
-                    <img 
-                      src={project.image} 
-                      alt={project.title} 
-                      className="w-full h-full object-cover transition-transform duration-700 ease-in-out group-hover:scale-110"
-                    />
-                  </div>
-                  <div className={`p-8 flex flex-col flex-grow ${isFeatured ? 'lg:w-2/5 lg:justify-center' : ''}`}>
-                    <h2 className={`
-                      font-semibold mb-3 text-gray-100 group-hover:text-violet-300 transition-colors duration-300
-                      ${isFeatured ? 'text-4xl' : 'text-2xl'}
-                    `}>
-                      {project.title}
-                    </h2>
-                    <div className={`text-gray-300 mb-4 whitespace-pre-line flex-grow ${isFeatured ? 'text-lg' : ''}`}>
-                      {project.description}
-                    </div>
-                    <div className="flex flex-wrap gap-2 mt-auto pt-4">
+        <div className="relative">
+          {projects.map((project, index) => (
+            <a 
+              href={project.url} 
+              key={index} 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="project-list-item block group"
+              onMouseEnter={() => setActiveProject({ image: project.image, title: project.title })}
+              onMouseLeave={() => setActiveProject(null)}
+            >
+              <div className="flex items-center justify-between pointer-events-none">
+                <div className="flex items-center gap-8">
+                  <span className="text-sm font-mono text-gray-600 hidden md:inline">0{index + 1}</span>
+                  <h2 className="project-title">{project.title}</h2>
+                </div>
+                
+                <div className="project-meta hidden lg:block">
+                  <div className="flex gap-4 items-center">
+                    <div className="flex flex-wrap gap-2 justify-end">
                       {project.tags.map(tag => (
-                        <span key={tag} className="text-xs bg-white/10 text-violet-300 px-3 py-1 rounded-full border border-white/5">
+                        <span key={tag} className="text-[10px] bg-white/5 text-violet-300 px-2 py-0.5 rounded border border-white/5">
                           {tag}
                         </span>
                       ))}
                     </div>
+                    <span className="text-2xl font-light text-gray-500 w-16">{project.year}</span>
                   </div>
-                  
-                  {/* Sheen effect overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/5 to-transparent skew-x-12 translate-x-[-150%] group-hover:animate-sheen pointer-events-none" />
+                  <p className="text-sm text-gray-400 mt-2 max-w-xs">{project.description}</p>
                 </div>
-              </a>
-            );
-          })}
+              </div>
+            </a>
+          ))}
+        </div>
+
+        <ProjectHoverPreview 
+          activeImage={activeProject?.image || null} 
+          activeTitle={activeProject?.title || null} 
+        />
+        
+        <div className="mt-32 border-t border-white/5 pt-12 flex justify-between text-gray-600 font-mono text-xs uppercase tracking-[0.3em]">
+          <span>© 2024 Shiting Lin</span>
+          <span>Built for the future_</span>
         </div>
       </div>
     </div>
