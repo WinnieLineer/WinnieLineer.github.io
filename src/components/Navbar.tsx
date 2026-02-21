@@ -1,38 +1,104 @@
 import { useState, useEffect } from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useLocation } from 'react-router-dom';
 
 export const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
+  const [open, setOpen] = useState(false);
+  const location = useLocation();
+
+  // Close menu on route change
+  useEffect(() => { setOpen(false); }, [location]);
 
   useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 10);
-    };
+    const handleScroll = () => setScrolled(window.scrollY > 10);
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   const linkClass = ({ isActive }: { isActive: boolean }) =>
-    `text-lg transition-colors duration-300 hover:text-white ${isActive ? 'text-white font-semibold' : 'text-gray-400'}`;
+    `text-base transition-colors duration-300 hover:text-white ${isActive ? 'text-white font-semibold' : 'text-gray-400'}`;
+
+  const mobileLinkClass = ({ isActive }: { isActive: boolean }) =>
+    `block text-2xl font-bold transition-colors duration-200 py-3 border-b border-white/8 hover:text-violet-300 ${isActive ? 'text-white' : 'text-gray-400'}`;
+
+  const navLinks = [
+    { to: '/',          label: 'Home' },
+    { to: '/portfolio', label: 'Portfolio' },
+    { to: '/posts',     label: 'Posts' },
+  ];
 
   return (
-    <nav className={`fixed top-0 left-0 w-full p-4 z-50 transition-all duration-300 ${scrolled ? 'bg-black/20 backdrop-blur-xl border-b border-white/10' : 'bg-transparent'}`}>
-      <div className="container mx-auto flex justify-between items-center">
-        <NavLink to="/" className="text-2xl font-bold text-white transition-colors hover:text-violet-300">
-          Shi Ting Lin
-        </NavLink>
-        <div className="space-x-8">
-          <NavLink to="/" className={linkClass}>
-            Home
+    <>
+      <nav
+        className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${
+          scrolled || open ? 'bg-black/60 backdrop-blur-xl border-b border-white/10' : 'bg-transparent'
+        }`}
+      >
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 flex justify-between items-center h-14">
+          {/* Brand */}
+          <NavLink to="/" className="text-xl font-bold text-white hover:text-violet-300 transition-colors shrink-0">
+            Shi Ting Lin
           </NavLink>
-          <NavLink to="/portfolio" className={linkClass}>
-            Portfolio
-          </NavLink>
-          <NavLink to="/posts" className={linkClass}>
-            Posts
-          </NavLink>
+
+          {/* Desktop links */}
+          <div className="hidden sm:flex items-center gap-8">
+            {navLinks.map(({ to, label }) => (
+              <NavLink key={to} to={to} className={linkClass} end={to === '/'}>
+                {label}
+              </NavLink>
+            ))}
+          </div>
+
+          {/* Mobile hamburger */}
+          <button
+            className="sm:hidden flex flex-col gap-1.5 p-1 z-50"
+            onClick={() => setOpen(o => !o)}
+            aria-label="Toggle menu"
+          >
+            <span
+              className="block w-6 h-0.5 bg-white transition-all duration-300"
+              style={{ transform: open ? 'rotate(45deg) translateY(8px)' : 'none' }}
+            />
+            <span
+              className="block w-6 h-0.5 bg-white transition-all duration-300"
+              style={{ opacity: open ? 0 : 1 }}
+            />
+            <span
+              className="block w-6 h-0.5 bg-white transition-all duration-300"
+              style={{ transform: open ? 'rotate(-45deg) translateY(-8px)' : 'none' }}
+            />
+          </button>
+        </div>
+      </nav>
+
+      {/* Mobile drawer */}
+      <div
+        className="sm:hidden fixed inset-0 z-40 transition-all duration-400"
+        style={{
+          opacity: open ? 1 : 0,
+          pointerEvents: open ? 'auto' : 'none',
+          background: 'rgba(0,0,0,0.92)',
+          backdropFilter: 'blur(20px)',
+        }}
+      >
+        <div className="flex flex-col justify-center h-full px-10 pb-10">
+          <p className="text-xs uppercase tracking-[0.3em] text-violet-400 mb-8">Navigation</p>
+          {navLinks.map(({ to, label }) => (
+            <NavLink key={to} to={to} className={mobileLinkClass} end={to === '/'}>
+              {label}
+            </NavLink>
+          ))}
+
+          <div className="mt-12 pt-8 border-t border-white/10">
+            <a
+              href="mailto:hi@winnie-lin.space"
+              className="text-sm text-gray-500 hover:text-violet-300 transition-colors"
+            >
+              hi@winnie-lin.space
+            </a>
+          </div>
         </div>
       </div>
-    </nav>
+    </>
   );
 };

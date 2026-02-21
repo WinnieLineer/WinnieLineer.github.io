@@ -151,50 +151,50 @@ const ExperienceCard = ({
         transition: 'opacity 0.6s ease, transform 0.6s ease',
       }}
     >
-      {/* Timeline dot */}
+      {/* Timeline dot — left side on mobile, center on desktop */}
       <div
-        className="absolute left-1/2 top-6 -translate-x-1/2 w-4 h-4 rounded-full border-2 border-[#111] z-10"
+        className="absolute md:left-1/2 left-0 top-6 md:-translate-x-1/2 w-4 h-4 rounded-full border-2 border-[#111] z-10"
         style={{ background: job.color, boxShadow: `0 0 12px ${job.color}80` }}
       />
 
       {/* Card (alternating sides on md+) */}
       <div
         className={`
-          md:w-[46%] p-6 rounded-2xl border border-white/10 bg-black/30 backdrop-blur-sm
+          w-full md:w-[46%] p-5 sm:p-6 rounded-2xl border border-white/10 bg-black/30 backdrop-blur-sm
           hover:border-white/25 hover:bg-black/50 transition-all duration-300 group cursor-pointer
           ${isEven ? 'md:mr-auto md:pr-12' : 'md:ml-auto md:pl-12'}
         `}
         onClick={() => setExpanded(!expanded)}
       >
         {/* Header */}
-        <div className="flex items-start justify-between gap-3 mb-3">
-          <div>
-            <h3 className="text-lg font-bold text-white group-hover:text-violet-200 transition-colors">
+        <div className="flex flex-col gap-1.5 mb-3">
+          <div className="flex items-start justify-between gap-2">
+            <h3 className="text-base sm:text-lg font-bold text-white group-hover:text-violet-200 transition-colors leading-tight">
               {job.role}
             </h3>
-            <div className="flex items-center gap-2 mt-0.5">
-              {job.url ? (
-                <a
-                  href={job.url}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="text-sm font-semibold hover:underline"
-                  style={{ color: job.color }}
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  {job.company}
-                </a>
-              ) : (
-                <span className="text-sm font-semibold" style={{ color: job.color }}>
-                  {job.company}
-                </span>
-              )}
-              <span className="text-xs text-gray-500">· {job.location}</span>
-            </div>
+            <span className="shrink-0 text-[10px] text-gray-400 bg-white/5 px-2 py-1 rounded-full whitespace-nowrap">
+              {job.period}
+            </span>
           </div>
-          <span className="shrink-0 text-xs text-gray-400 bg-white/5 px-2 py-1 rounded-full">
-            {job.period}
-          </span>
+          <div className="flex items-center gap-2">
+            {job.url ? (
+              <a
+                href={job.url}
+                target="_blank"
+                rel="noreferrer"
+                className="text-sm font-semibold hover:underline"
+                style={{ color: job.color }}
+                onClick={(e) => e.stopPropagation()}
+              >
+                {job.company}
+              </a>
+            ) : (
+              <span className="text-sm font-semibold" style={{ color: job.color }}>
+                {job.company}
+              </span>
+            )}
+            <span className="text-xs text-gray-500">· {job.location}</span>
+          </div>
         </div>
 
         {/* Tags always visible */}
