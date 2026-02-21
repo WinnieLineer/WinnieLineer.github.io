@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef } from 'react';
-import { ProjectHoverPreview } from '../components/ProjectHoverPreview';
 
 const projects = [
   {
@@ -161,7 +160,6 @@ const ParticleField = () => {
 
 
 export const PortfolioPage = () => {
-  const [activeProject, setActiveProject] = useState<{ image: string; title: string } | null>(null);
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const [cursorBlink, setCursorBlink] = useState(true);
   const [titleVisible, setTitleVisible] = useState(false);
@@ -260,11 +258,9 @@ export const PortfolioPage = () => {
               rel="noopener noreferrer"
               className="project-list-item-v2 block group"
               onMouseEnter={() => {
-                setActiveProject({ image: project.image, title: project.title });
                 setHoveredIndex(index);
               }}
               onMouseLeave={() => {
-                setActiveProject(null);
                 setHoveredIndex(null);
               }}
               style={{
@@ -373,10 +369,6 @@ export const PortfolioPage = () => {
           ))}
         </div>
 
-        <ProjectHoverPreview
-          activeImage={activeProject?.image || null}
-          activeTitle={activeProject?.title || null}
-        />
 
         {/* Footer */}
         <div

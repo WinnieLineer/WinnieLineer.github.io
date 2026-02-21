@@ -4,12 +4,12 @@ import { HomePage } from './pages/HomePage';
 import { PostsPage } from './pages/PostsPage';
 import { PostDetailPage } from './pages/PostDetailPage';
 import { PortfolioPage } from './pages/PortfolioPage';
-import { CursorGlow } from './components/CursorGlow';
+import { FancyCursor } from './components/FancyCursor';
 
 function App() {
   return (
     <BrowserRouter>
-      <CursorGlow />
+      <FancyCursor />
       <Navbar />
       <Routes>
         <Route path="/" element={<HomePage />} />
