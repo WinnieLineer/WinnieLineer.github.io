@@ -25,11 +25,11 @@ export const Navbar = () => {
           <NavLink to="/" className={linkClass}>
             Home
           </NavLink>
-          <NavLink to="/posts" className={linkClass}>
-            Posts
-          </NavLink>
           <NavLink to="/portfolio" className={linkClass}>
             Portfolio
+          </NavLink>
+          <NavLink to="/posts" className={linkClass}>
+            Posts
           </NavLink>
         </div>
       </div>
