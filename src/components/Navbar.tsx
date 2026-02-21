@@ -22,9 +22,10 @@ export const Navbar = () => {
     `block text-2xl font-bold transition-colors duration-200 py-3 border-b border-white/8 hover:text-violet-300 ${isActive ? 'text-white' : 'text-gray-400'}`;
 
   const navLinks = [
-    { to: '/',          label: 'Home' },
-    { to: '/portfolio', label: 'Portfolio' },
-    { to: '/posts',     label: 'Posts' },
+    { to: '/',           label: 'Home' },
+    { to: '/portfolio',  label: 'Attempts' },
+    { to: '/posts',      label: 'Posts' },
+    { to: '/playground', label: 'Playground' },
   ];
 
   return (

@@ -1,9 +1,10 @@
 import { useState, useEffect, useRef } from 'react';
+import { SidePreview } from '../components/SidePreview';
 
 const projects = [
   {
     title: 'Asset Insights',
-    description: 'An advanced asset tracking dashboard featuring automatic asset classification, real-time stock price updates, and dynamic rendering of historical asset value bar charts.',
+    description: 'An advanced asset tracking dashboard with automatic classification, real-time stock prices, and historical bar charts.',
     image: '/portfolio/asset-insights.png',
     url: 'https://winnie-lin.space/asset-insights/',
     tags: ['Finance', 'AI', 'Real-time'],
@@ -12,7 +13,7 @@ const projects = [
   },
   {
     title: 'Dawnguard',
-    description: 'An AI-powered counseling chatbot themed around Tanjiro Kamado. Provides empathetic, supportive interactions.',
+    description: 'An AI-powered counseling chatbot themed around Tanjiro Kamado. Empathetic and supportive.',
     image: '/portfolio/dawnguard.png',
     url: 'https://winnie-lin.space/dawnguard/',
     tags: ['Mental Health', 'Chatbot', 'Anime'],
@@ -21,7 +22,7 @@ const projects = [
   },
   {
     title: 'Focus Flow',
-    description: 'A productivity PWA featuring strict session management and distraction penalties. Designed with a premium glassmorphism UI.',
+    description: 'A productivity PWA with strict session management and distraction penalties. Premium glassmorphism UI.',
     image: '/portfolio/focus-flow.png',
     url: 'https://winnie-lin.space/focus-flow/',
     tags: ['Productivity', 'PWA', 'Focus'],
@@ -39,7 +40,7 @@ const projects = [
   },
   {
     title: 'Pomodoro',
-    description: 'A minimalist Pomodoro timer designed to optimize workflow and manage time effectively.',
+    description: 'A minimalist Pomodoro timer to optimize workflow and manage time effectively.',
     image: '/portfolio/pomodoro.png',
     url: 'https://winnie-lin.space/Pomodoro/',
     tags: ['Productivity', 'Time Management'],
@@ -57,7 +58,7 @@ const projects = [
   },
   {
     title: 'BPTracker',
-    description: 'A health monitoring app utilizing OCR for automated blood pressure and weight logging.',
+    description: 'A health monitoring app with OCR for automated blood pressure and weight logging.',
     image: '/portfolio/bptracker.png',
     url: 'https://winnie-lin.space/BPTracker/',
     tags: ['Health', 'OCR', 'AI'],
@@ -66,45 +67,32 @@ const projects = [
   },
 ];
 
-// Floating particle component
+// Floating particle background
 const ParticleField = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
-
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
-
-    const particles: { x: number; y: number; vx: number; vy: number; size: number; opacity: number; color: string }[] = [];
     const colors = ['#7c3aed', '#0ea5e9', '#10b981', '#f59e0b', '#ec4899'];
-
-    for (let i = 0; i < 60; i++) {
-      particles.push({
-        x: Math.random() * canvas.width,
-        y: Math.random() * canvas.height,
-        vx: (Math.random() - 0.5) * 0.3,
-        vy: (Math.random() - 0.5) * 0.3,
-        size: Math.random() * 2 + 0.5,
-        opacity: Math.random() * 0.5 + 0.1,
-        color: colors[Math.floor(Math.random() * colors.length)],
-      });
-    }
-
+    const particles = Array.from({ length: 45 }, () => ({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height,
+      vx: (Math.random() - 0.5) * 0.25,
+      vy: (Math.random() - 0.5) * 0.25,
+      size: Math.random() * 1.8 + 0.5,
+      opacity: Math.random() * 0.4 + 0.1,
+      color: colors[Math.floor(Math.random() * colors.length)],
+    }));
     let animId: number;
     const animate = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       particles.forEach(p => {
-        p.x += p.vx;
-        p.y += p.vy;
-        if (p.x < 0) p.x = canvas.width;
-        if (p.x > canvas.width) p.x = 0;
-        if (p.y < 0) p.y = canvas.height;
-        if (p.y > canvas.height) p.y = 0;
-
+        p.x = (p.x + p.vx + canvas.width) % canvas.width;
+        p.y = (p.y + p.vy + canvas.height) % canvas.height;
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
         ctx.fillStyle = p.color;
@@ -112,52 +100,33 @@ const ParticleField = () => {
         ctx.fill();
         ctx.globalAlpha = 1;
       });
-
-      // Draw faint connector lines
+      // Connector lines
       for (let i = 0; i < particles.length; i++) {
         for (let j = i + 1; j < particles.length; j++) {
           const dx = particles[i].x - particles[j].x;
           const dy = particles[i].y - particles[j].y;
-          const dist = Math.sqrt(dx * dx + dy * dy);
-          if (dist < 120) {
+          const d = Math.sqrt(dx * dx + dy * dy);
+          if (d < 100) {
             ctx.beginPath();
             ctx.moveTo(particles[i].x, particles[i].y);
             ctx.lineTo(particles[j].x, particles[j].y);
             ctx.strokeStyle = particles[i].color;
-            ctx.globalAlpha = (1 - dist / 120) * 0.12;
+            ctx.globalAlpha = (1 - d / 100) * 0.1;
             ctx.lineWidth = 0.5;
             ctx.stroke();
             ctx.globalAlpha = 1;
           }
         }
       }
-
       animId = requestAnimationFrame(animate);
     };
     animate();
-
-    const handleResize = () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-    };
-    window.addEventListener('resize', handleResize);
-
-    return () => {
-      cancelAnimationFrame(animId);
-      window.removeEventListener('resize', handleResize);
-    };
+    const onResize = () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; };
+    window.addEventListener('resize', onResize);
+    return () => { cancelAnimationFrame(animId); window.removeEventListener('resize', onResize); };
   }, []);
-
-  return (
-    <canvas
-      ref={canvasRef}
-      className="fixed inset-0 pointer-events-none"
-      style={{ zIndex: 0, opacity: 0.7 }}
-    />
-  );
+  return <canvas ref={canvasRef} className="fixed inset-0 pointer-events-none" style={{ zIndex: 0, opacity: 0.6 }} />;
 };
-
-
 
 export const PortfolioPage = () => {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
@@ -171,82 +140,69 @@ export const PortfolioPage = () => {
     return () => clearInterval(interval);
   }, []);
 
-  // Staggered entrance animation
+  // Staggered entrance
   useEffect(() => {
     const t = setTimeout(() => setTitleVisible(true), 100);
     projects.forEach((_, i) => {
       setTimeout(() => {
-        setVisibleItems(prev => {
-          const next = [...prev];
-          next[i] = true;
-          return next;
-        });
-      }, 300 + i * 100);
+        setVisibleItems(prev => { const next = [...prev]; next[i] = true; return next; });
+      }, 200 + i * 90);
     });
     return () => clearTimeout(t);
   }, []);
 
+  const hoveredProject = hoveredIndex !== null ? projects[hoveredIndex] : null;
+  const isLeft = hoveredIndex !== null && hoveredIndex % 2 === 0;
+  const side = isLeft ? 'left' : 'right';
+
   return (
-    <div className="relative min-h-screen p-8 pt-32 bg-[#0a0a0a] overflow-hidden">
-      {/* Particle background */}
+    <div className="relative min-h-screen bg-[#0a0a0a] overflow-hidden">
       <ParticleField />
 
-      {/* Ambient glow blobs */}
-      <div
-        className="fixed pointer-events-none"
-        style={{
-          top: '20%', left: '10%',
-          width: '500px', height: '500px',
-          background: 'radial-gradient(circle, rgba(124,58,237,0.06) 0%, transparent 70%)',
-          borderRadius: '50%',
-          zIndex: 0,
-        }}
-      />
-      <div
-        className="fixed pointer-events-none"
-        style={{
-          bottom: '10%', right: '5%',
-          width: '600px', height: '600px',
-          background: 'radial-gradient(circle, rgba(14,165,233,0.05) 0%, transparent 70%)',
-          borderRadius: '50%',
-          zIndex: 0,
-        }}
-      />
+      {/* Ambient glows */}
+      <div className="fixed pointer-events-none" style={{ top: '15%', left: '5%', width: 500, height: 500, background: 'radial-gradient(circle, rgba(124,58,237,0.05) 0%, transparent 70%)', borderRadius: '50%', zIndex: 0 }} />
+      <div className="fixed pointer-events-none" style={{ bottom: '10%', right: '5%', width: 600, height: 600, background: 'radial-gradient(circle, rgba(14,165,233,0.04) 0%, transparent 70%)', borderRadius: '50%', zIndex: 0 }} />
 
-      <div className="container mx-auto relative" style={{ zIndex: 1 }}>
+      {/* Side floating preview */}
+      {hoveredProject && (
+        <SidePreview
+          image={hoveredProject.image}
+          title={hoveredProject.title}
+          index={hoveredIndex!}
+          visible={hoveredIndex !== null}
+          side={side}
+          color={hoveredProject.color}
+        />
+      )}
+
+      {/* Main content */}
+      <div className="relative mx-auto px-8 md:px-16 lg:px-24 pt-32 pb-24" style={{ maxWidth: '860px', zIndex: 1 }}>
+
         {/* Header */}
         <div
-          className="flex justify-between items-baseline mb-24"
           style={{
             opacity: titleVisible ? 1 : 0,
-            transform: titleVisible ? 'translateY(0)' : 'translateY(-20px)',
+            transform: titleVisible ? 'translateY(0)' : 'translateY(-16px)',
             transition: 'all 0.8s cubic-bezier(0.16, 1, 0.3, 1)',
+            marginBottom: '64px',
           }}
         >
-          <div>
-            <div className="text-xs font-mono text-violet-400/60 uppercase tracking-[0.4em] mb-4">
-              ◈ Selected Works
-            </div>
-            <h1 className="portfolio-main-title">Projects</h1>
+          <div className="text-xs font-mono text-violet-400/60 uppercase tracking-[0.4em] mb-3">
+            ◈ Attempts
           </div>
-          <div className="text-right">
-            <div className="text-gray-500 font-mono text-sm">2024–2026</div>
-            <div className="text-[10px] text-gray-700 font-mono mt-1 tracking-widest uppercase">
-              {projects.length} works total
+          <div className="flex justify-between items-baseline">
+            <h1 className="portfolio-main-title">Experiments</h1>
+            <div className="text-right">
+              <div className="text-gray-500 font-mono text-sm">2024–2026</div>
+              <div className="text-[10px] text-gray-700 font-mono mt-1 tracking-widest uppercase">
+                things i built for fun
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Horizontal rule with glow */}
-        <div className="w-full h-px mb-0 relative overflow-visible">
-          <div
-            className="absolute inset-0"
-            style={{
-              background: 'linear-gradient(90deg, transparent, rgba(124,58,237,0.4), rgba(14,165,233,0.4), transparent)',
-              boxShadow: '0 0 20px rgba(124,58,237,0.3)',
-            }}
-          />
-        </div>
+        {/* Divider */}
+        <div className="w-full h-px mb-0 relative" style={{ background: 'linear-gradient(90deg, transparent, rgba(124,58,237,0.4), rgba(14,165,233,0.3), transparent)' }} />
 
         {/* Project list */}
         <div className="relative">
@@ -256,132 +212,171 @@ export const PortfolioPage = () => {
               key={index}
               target="_blank"
               rel="noopener noreferrer"
-              className="project-list-item-v2 block group"
-              onMouseEnter={() => {
-                setHoveredIndex(index);
-              }}
-              onMouseLeave={() => {
-                setHoveredIndex(null);
-              }}
+              className="block group"
+              onMouseEnter={() => setHoveredIndex(index)}
+              onMouseLeave={() => setHoveredIndex(null)}
               style={{
-                '--project-color': project.color,
                 opacity: visibleItems[index] ? 1 : 0,
-                transform: visibleItems[index] ? 'translateX(0)' : 'translateX(-30px)',
-                transition: `opacity 0.6s ease ${index * 0.05}s, transform 0.6s cubic-bezier(0.16,1,0.3,1) ${index * 0.05}s`,
-              } as React.CSSProperties}
+                transform: visibleItems[index] ? 'translateX(0)' : 'translateX(-20px)',
+                transition: `opacity 0.5s ease ${index * 0.05}s, transform 0.5s cubic-bezier(0.16,1,0.3,1) ${index * 0.05}s`,
+              }}
             >
-              {/* Hover glow sweep */}
+              {/* Row */}
               <div
-                className="project-glow-sweep"
-                style={{ '--project-color': project.color } as React.CSSProperties}
-              />
+                className="flex items-center justify-between py-5 relative"
+                style={{
+                  borderBottom: `1px solid ${hoveredIndex === index ? `${project.color}33` : 'rgba(255,255,255,0.05)'}`,
+                  transition: 'border-color 0.3s ease',
+                }}
+              >
+                {/* Left: number + title + tags */}
+                <div className="flex items-center gap-5 min-w-0 flex-1 pr-6">
+                  {/* Index */}
+                  <span
+                    className="text-xs font-mono shrink-0 tabular-nums transition-all duration-300 hidden sm:inline"
+                    style={{
+                      color: hoveredIndex === index ? project.color : 'transparent',
+                      WebkitTextStroke: hoveredIndex === index ? '0px' : '1px rgba(255,255,255,0.12)',
+                      textShadow: hoveredIndex === index ? `0 0 8px ${project.color}` : 'none',
+                      width: '28px',
+                    }}
+                  >
+                    {String(index + 1).padStart(2, '0')}
+                  </span>
 
-              <div className="flex items-center justify-between relative z-10 py-8 px-2">
-                <div className="flex items-center gap-8">
-                  {/* Index number */}
-                  <div className="relative hidden md:block w-10">
-                    <span
-                      className="text-sm font-mono transition-all duration-500"
+                  <div className="min-w-0">
+                    {/* Title */}
+                    <h2
+                      className="font-black uppercase tracking-tighter leading-none transition-all duration-400"
                       style={{
-                        color: hoveredIndex === index ? project.color : 'transparent',
-                        WebkitTextStroke: hoveredIndex === index ? '0px' : `1px rgba(255,255,255,0.15)`,
-                        textShadow: hoveredIndex === index ? `0 0 10px ${project.color}` : 'none',
-                        fontVariantNumeric: 'tabular-nums',
+                        fontSize: 'clamp(1.8rem, 4vw, 3.5rem)',
+                        background: hoveredIndex === index
+                          ? `linear-gradient(135deg, #ffffff 0%, ${project.color} 100%)`
+                          : `linear-gradient(135deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.06) 100%)`,
+                        WebkitBackgroundClip: 'text',
+                        WebkitTextFillColor: 'transparent',
+                        backgroundClip: 'text',
+                        WebkitTextStroke: hoveredIndex === index ? '0px' : '1px rgba(255,255,255,0.14)',
+                        filter: hoveredIndex === index ? `drop-shadow(0 0 18px ${project.color}55)` : 'none',
+                        transition: 'all 0.35s ease',
+                        display: 'block',
                       }}
                     >
-                      {String(index + 1).padStart(2, '0')}
-                    </span>
-                  </div>
+                      {project.title}
+                    </h2>
 
-                  {/* Title */}
-                  <h2
-                    className="project-title-v2"
-                    style={{
-                      '--project-color': project.color,
-                    } as React.CSSProperties}
-                  >
-                    {project.title}
-                  </h2>
+                    {/* Description — shows on hover */}
+                    <p
+                      className="text-xs leading-relaxed mt-1 max-w-sm transition-all duration-300"
+                      style={{
+                        color: hoveredIndex === index ? 'rgba(255,255,255,0.5)' : 'transparent',
+                        maxHeight: hoveredIndex === index ? '60px' : '0px',
+                        overflow: 'hidden',
+                        transition: 'color 0.3s ease, max-height 0.4s ease',
+                      }}
+                    >
+                      {project.description}
+                    </p>
+                  </div>
                 </div>
 
-                {/* Right side metadata */}
-                <div className="project-meta-v2 hidden lg:flex flex-col items-end gap-3">
-                  <div className="flex gap-2 flex-wrap justify-end">
+                {/* Right: thumbnail card + year */}
+                <div className="flex items-center gap-4 shrink-0">
+                  {/* Tags (only on hover, large screen) */}
+                  <div
+                    className="hidden xl:flex gap-1.5 flex-wrap justify-end"
+                    style={{
+                      opacity: hoveredIndex === index ? 1 : 0,
+                      transform: hoveredIndex === index ? 'translateX(0)' : 'translateX(8px)',
+                      transition: 'all 0.3s ease',
+                    }}
+                  >
                     {project.tags.map(tag => (
                       <span
                         key={tag}
-                        className="text-[10px] font-mono px-2.5 py-1 rounded-full border transition-all duration-300"
+                        className="text-[9px] font-mono px-2 py-0.5 rounded-full"
                         style={{
-                          borderColor: hoveredIndex === index ? `${project.color}66` : 'rgba(255,255,255,0.08)',
-                          color: hoveredIndex === index ? project.color : 'rgba(255,255,255,0.4)',
-                          background: hoveredIndex === index ? `${project.color}10` : 'transparent',
-                          boxShadow: hoveredIndex === index ? `0 0 8px ${project.color}33` : 'none',
+                          border: `1px solid ${project.color}55`,
+                          color: project.color,
+                          background: `${project.color}0d`,
                         }}
                       >
                         {tag}
                       </span>
                     ))}
                   </div>
-                  <div className="flex items-center gap-3">
-                    <p
-                      className="text-xs text-gray-500 max-w-[260px] text-right leading-relaxed transition-colors duration-300"
-                      style={{ color: hoveredIndex === index ? 'rgba(255,255,255,0.6)' : 'rgba(255,255,255,0.25)' }}
-                    >
-                      {project.description}
-                    </p>
-                    <span
-                      className="text-xl font-light transition-all duration-300 whitespace-nowrap"
-                      style={{
-                        color: hoveredIndex === index ? project.color : 'rgba(255,255,255,0.2)',
-                        textShadow: hoveredIndex === index ? `0 0 15px ${project.color}` : 'none',
-                      }}
-                    >
-                      {project.year}
-                    </span>
-                  </div>
-                </div>
 
-                {/* Arrow indicator */}
-                <div
-                  className="ml-4 text-lg transition-all duration-300 hidden lg:block"
-                  style={{
-                    color: project.color,
-                    opacity: hoveredIndex === index ? 1 : 0,
-                    transform: hoveredIndex === index ? 'translateX(0) rotate(-45deg)' : 'translateX(-8px) rotate(-45deg)',
-                    textShadow: `0 0 10px ${project.color}`,
-                  }}
-                >
-                  ↗
+                  {/* Year */}
+                  <span
+                    className="text-base font-light font-mono transition-all duration-300 hidden sm:block"
+                    style={{
+                      color: hoveredIndex === index ? project.color : 'rgba(255,255,255,0.15)',
+                      textShadow: hoveredIndex === index ? `0 0 12px ${project.color}` : 'none',
+                      minWidth: '44px',
+                      textAlign: 'right',
+                    }}
+                  >
+                    {project.year}
+                  </span>
+
+                  {/* Thumbnail card */}
+                  <div
+                    className="relative overflow-hidden rounded shrink-0"
+                    style={{
+                      width: 'clamp(64px, 8vw, 90px)',
+                      aspectRatio: '16/10',
+                      border: `1px solid ${hoveredIndex === index ? `${project.color}55` : 'rgba(255,255,255,0.08)'}`,
+                      boxShadow: hoveredIndex === index ? `0 0 20px ${project.color}30` : 'none',
+                      transition: 'border-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease',
+                      transform: hoveredIndex === index ? 'scale(1.04)' : 'scale(1)',
+                    }}
+                  >
+                    <img
+                      src={project.image}
+                      alt={project.title}
+                      className="w-full h-full object-cover transition-all duration-500"
+                      style={{
+                        filter: hoveredIndex === index ? 'none' : 'grayscale(60%) brightness(0.5)',
+                      }}
+                    />
+                    {/* Color overlay on hover */}
+                    <div
+                      className="absolute inset-0 transition-opacity duration-300"
+                      style={{
+                        background: `linear-gradient(135deg, ${project.color}22, transparent)`,
+                        opacity: hoveredIndex === index ? 1 : 0,
+                      }}
+                    />
+                  </div>
+
+                  {/* Arrow */}
+                  <span
+                    className="text-base transition-all duration-300 hidden md:block"
+                    style={{
+                      color: project.color,
+                      opacity: hoveredIndex === index ? 1 : 0,
+                      transform: hoveredIndex === index ? 'translate(0, 0)' : 'translate(-6px, 6px)',
+                      textShadow: `0 0 8px ${project.color}`,
+                    }}
+                  >
+                    ↗
+                  </span>
                 </div>
               </div>
-
-              {/* Bottom border with glow */}
-              <div
-                className="absolute bottom-0 left-0 h-px w-full transition-all duration-500"
-                style={{
-                  background: hoveredIndex === index
-                    ? `linear-gradient(90deg, transparent, ${project.color}80, transparent)`
-                    : 'rgba(255,255,255,0.06)',
-                  boxShadow: hoveredIndex === index ? `0 0 8px ${project.color}60` : 'none',
-                }}
-              />
             </a>
           ))}
         </div>
 
-
         {/* Footer */}
         <div
-          className="mt-32 pt-12 flex justify-between items-center text-gray-700 font-mono text-xs uppercase tracking-[0.3em]"
-          style={{
-            borderTop: '1px solid rgba(255,255,255,0.04)',
-          }}
+          className="mt-24 pt-10 flex justify-between items-center text-gray-700 font-mono text-xs uppercase tracking-[0.3em]"
+          style={{ borderTop: '1px solid rgba(255,255,255,0.04)' }}
         >
           <span>© 2026 Shiting Lin</span>
           <span className="flex items-center gap-1">
-            Built for the future
+            Built for curiosity
             <span
-              className="inline-block w-[2px] h-[14px] bg-violet-400 ml-1"
+              className="inline-block w-[2px] h-[13px] bg-violet-400 ml-1"
               style={{ opacity: cursorBlink ? 1 : 0, transition: 'opacity 0.1s' }}
             />
           </span>
