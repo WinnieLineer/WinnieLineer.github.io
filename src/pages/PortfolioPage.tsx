@@ -1,5 +1,16 @@
 import { useEffect, useRef, useState } from 'react';
 
+type Project = {
+  title: string;
+  description: string;
+  image?: string;
+  noImage?: boolean;
+  url: string;
+  tags: string[];
+  year: string;
+  accent: string;
+};
+
 const projects = [
   {
     title: 'Asset Insights',
@@ -49,7 +60,7 @@ const projects = [
   {
     title: 'DreamScape',
     description: 'A visually striking interactive 3D demo resembling a high-quality game title sequence.',
-    image: '/portfolio/dreamscape.png',
+    noImage: true,
     url: 'https://winnie-lin.space/DreamScape/',
     tags: ['Animation', 'Demo', 'Game'],
     year: '2024',
@@ -58,7 +69,7 @@ const projects = [
   {
     title: 'BPTracker',
     description: 'A health monitoring app utilizing OCR for automated blood pressure and weight logging.',
-    image: '/portfolio/bptracker.png',
+    noImage: true,
     url: 'https://winnie-lin.space/BPTracker/',
     tags: ['Health', 'OCR', 'AI'],
     year: '2024',
@@ -81,9 +92,9 @@ const useInView = (threshold = 0.1) => {
 };
 
 // ─── Project Card ─────────────────────────────────────────────────────────────
-const ProjectCard = ({ project, index }: { project: typeof projects[0]; index: number }) => {
+const ProjectCard = ({ project, index }: { project: Project; index: number }) => {
   const { ref, visible } = useInView();
-  const [imgError, setImgError] = useState(false);
+  const [imgError, setImgError] = useState(project.noImage ?? false);
 
   return (
     <div
@@ -117,7 +128,7 @@ const ProjectCard = ({ project, index }: { project: typeof projects[0]; index: n
             (e.currentTarget as HTMLElement).style.transform = '';
           }}
         >
-          {/* Image */}
+          {/* Image / No-image zone */}
           <div className="relative w-full aspect-video overflow-hidden bg-black/40">
             {!imgError ? (
               <img
@@ -127,16 +138,43 @@ const ProjectCard = ({ project, index }: { project: typeof projects[0]; index: n
                 onError={() => setImgError(true)}
               />
             ) : (
-              /* Fallback gradient tile when image fails */
+              /* Intentional no-image design — stylised gradient placard */
               <div
-                className="w-full h-full flex items-center justify-center text-4xl font-black select-none"
-                style={{
-                  background: `radial-gradient(ellipse at 30% 40%, ${project.accent}30 0%, transparent 60%), #0d0d0d`,
-                  color: project.accent,
-                  opacity: 0.6,
-                }}
+                className="w-full h-full relative flex flex-col items-center justify-center select-none overflow-hidden"
+                style={{ background: '#0a0a0a' }}
               >
-                {project.title[0]}
+                {/* Radial glow */}
+                <div style={{
+                  position: 'absolute', inset: 0,
+                  background: `radial-gradient(ellipse 70% 60% at 50% 55%, ${project.accent}22 0%, transparent 70%)`,
+                }} />
+                {/* Grid lines */}
+                <div style={{
+                  position: 'absolute', inset: 0,
+                  backgroundImage: `linear-gradient(${project.accent}10 1px, transparent 1px), linear-gradient(90deg, ${project.accent}10 1px, transparent 1px)`,
+                  backgroundSize: '28px 28px',
+                }} />
+                {/* Initial */}
+                <span style={{
+                  fontSize: '3.5rem',
+                  fontWeight: 900,
+                  color: project.accent,
+                  opacity: 0.18,
+                  lineHeight: 1,
+                  letterSpacing: '-0.04em',
+                  textShadow: `0 0 40px ${project.accent}`,
+                  position: 'relative',
+                }}>{project.title[0]}</span>
+                {/* Label */}
+                <span style={{
+                  position: 'relative',
+                  fontSize: '0.6rem',
+                  letterSpacing: '0.25em',
+                  textTransform: 'uppercase',
+                  color: project.accent,
+                  opacity: 0.4,
+                  marginTop: '0.4rem',
+                }}>preview unavailable</span>
               </div>
             )}
             {/* Overlay gradient */}
