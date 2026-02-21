@@ -105,3 +105,7 @@
 @keyframes glitch-skew { from { transform: skewX(0); } to { transform: skewX(2deg); } }
 @keyframes badge-in { from { opacity: 0; transform: scale(0.85) translateY(6px); } to { opacity: 1; transform: scale(1) translateY(0); } }
 @keyframes cursor-blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+@keyframes aurora-drift-1 { 0% { transform: translate(0, 0) scale(1); } 100% { transform: translate(5%, 8%) scale(1.12); } }
+@keyframes aurora-drift-2 { 0% { transform: translate(0, 0) scale(1); } 100% { transform: translate(-6%, -5%) scale(1.08); } }
+@keyframes shimmer-line { 0%, 100% { opacity: 0.6; } 50% { opacity: 1; } }
+
