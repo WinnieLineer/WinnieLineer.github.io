@@ -12,7 +12,7 @@ const PARTICLE_COUNT = 3500;
 const REPEL_RADIUS_SQ = 130 * 130;
 const REPEL_STRENGTH = 4.5;
 const DRAG_MULT      = 3.2;    // multiplier during mousedown
-const LERP_SPEED     = 0.07;   // how fast targets move (0=frozen, 1=instant)
+const LERP_SPEED     = 0.1;   // Increased from 0.07 for snappier tracking
 
 // ─── Selected face landmark indices for interesting features ─────────────────
 // Eyes, brows, lips, jawline, nose — richer on expressive zones
@@ -182,6 +182,14 @@ const CameraButton = ({ loading, modelReady, onClick }: {
   );
 };
 
+const HINTS = [
+  '✦ WAVE HANDS TO SCATTER',
+  '✦ OPEN MOUTH FOR DETAIL',
+  '✦ NOD SLOWLY TO SHIFT',
+  '✦ DRAG CURSOR TO PULL',
+  '✦ TAP FINGERTIPS TO PUSH',
+];
+
 // ─── Main ─────────────────────────────────────────────────────────────────────
 export const PlaygroundPage = () => {
   const displayCanvasRef = useRef<HTMLCanvasElement>(null);
@@ -200,6 +208,7 @@ export const PlaygroundPage = () => {
   const lastHandResult    = useRef<HandLandmarkerResult | null>(null);
   const lastVideoTime     = useRef(-1);
   const lastTrackingTime  = useRef(0);
+  const modelLoadingRef   = useRef(false);
 
   // Mouse repulsion state
   const mouseRef   = useRef({ x: -9999, y: -9999, down: false });
@@ -208,6 +217,7 @@ export const PlaygroundPage = () => {
   const [modelReady, setModelReady] = useState(false);
   const [loading,    setLoading]    = useState(false);
   const [error,      setError]      = useState<string | null>(null);
+  const [hintIdx,    setHintIdx]    = useState(0);
 
   // ── Init particles ──────────────────────────────────────────────────────────
   const initParticles = useCallback((W: number, H: number) => {
@@ -272,14 +282,22 @@ export const PlaygroundPage = () => {
           if (faceLandmarkerRef.current) {
             try { 
               lastFaceResult.current = faceLandmarkerRef.current.detectForVideo(video, now); 
-            } catch {}
+            } catch(e) { console.error('Face detect error:', e); }
           }
           if (handLandmarkerRef.current) {
             try { 
               lastHandResult.current = handLandmarkerRef.current.detectForVideo(video, now); 
-            } catch {}
+            } catch(e) { console.error('Hand detect error:', e); }
           }
           const tgts = buildLandmarkTargets(lastFaceResult.current, lastHandResult.current, W, H);
+          
+          // Debugging: expose to window
+          (window as any)._debug_tracking = {
+            faceCount: lastFaceResult.current?.faceLandmarks?.length ?? 0,
+            handCount: lastHandResult.current?.landmarks?.length ?? 0,
+            targetsCount: tgts.length
+          };
+
           if (tgts.length > 0) setRawTargets(tgts);
         }
       }
@@ -291,33 +309,20 @@ export const PlaygroundPage = () => {
 
     const dragMult = mouseRef.current.down ? DRAG_MULT : 1;
 
-    // Interaction points for repulsion (Face + Hands)
+    // Interaction points for repulsion (Hands only, Face removed for clarity)
     const interactPoints: { x: number; y: number; r: number; f: number }[] = [];
     if (mode === 'camera') {
-      // Hand tips repulsion
+      // Hand tip repulsion (Index finger only for precision)
       if (lastHandResult.current?.landmarks) {
         lastHandResult.current.landmarks.forEach(hand => {
-          // Tip of index finger (idx 8) and palm center (idx 0)
-          [0, 8, 12].forEach(idx => {
-            if (hand[idx]) {
-              interactPoints.push({
-                x: (1.0 - hand[idx].x) * W,
-                y: hand[idx].y * H,
-                r: 100, // radius
-                f: 4.0  // strength
-              });
-            }
-          });
-        });
-      }
-      // Face center repulsion (nose tip idx 1)
-      if (lastFaceResult.current?.faceLandmarks?.[0]?.[1]) {
-        const nose = lastFaceResult.current.faceLandmarks[0][1];
-        interactPoints.push({
-          x: (1.0 - nose.x) * W,
-          y: nose.y * H,
-          r: 150,
-          f: 3.0
+          if (hand[8]) { // Tip of index finger
+            interactPoints.push({
+              x: (1.0 - hand[8].x) * W,
+              y: hand[8].y * H,
+              r: 40,  // Reduced from 100
+              f: 2.5  // Reduced from 4.0
+            });
+          }
         });
       }
     }
@@ -387,18 +392,18 @@ export const PlaygroundPage = () => {
 
     idxRef.current = 0;
     applyCurrentPhrase();
-    renderLoop('idle');
 
     if (idleTimerRef.current) clearInterval(idleTimerRef.current);
     idleTimerRef.current = setInterval(() => {
       idxRef.current = (idxRef.current + 1) % IDLE_PHRASES.length;
       applyCurrentPhrase();
     }, 3200);
-  }, [initParticles, setRawTargets, renderLoop]);
+  }, [initParticles, setRawTargets]);
 
   // ── Load MediaPipe models ──────────────────────────────────────────────────
   const loadModels = useCallback(async () => {
-    if (faceLandmarkerRef.current) return; // already loaded
+    if (faceLandmarkerRef.current || modelLoadingRef.current) return;
+    modelLoadingRef.current = true;
     try {
       const vision = await FilesetResolver.forVisionTasks(
         'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/wasm'
@@ -426,8 +431,10 @@ export const PlaygroundPage = () => {
       handLandmarkerRef.current = hand;
       setModelReady(true);
     } catch (e) {
-      console.warn('[MediaPipe] Failed to load, will use fallback:', e);
-      setModelReady(true); // still allow camera with fallback
+      console.warn('[MediaPipe] Failed to load:', e);
+      setModelReady(true);
+    } finally {
+      modelLoadingRef.current = false;
     }
   }, []);
 
@@ -441,25 +448,20 @@ export const PlaygroundPage = () => {
       });
       streamRef.current = stream;
       const video = videoRef.current!;
-      video.width = 640;  // Explicit for MediaPipe
-      video.height = 480; // Explicit for MediaPipe
+      video.width = 640;
+      video.height = 480;
       video.srcObject = stream;
       
       const pip = pipVideoRef.current!;
-      pip.width = 640;  // Match dimensions
+      pip.width = 640;
       pip.height = 480;
-      // Clone the stream for the second video to avoid resource contention
       const pipStream = stream.clone();
       pip.srcObject = pipStream;
 
-      // Ensure both play successfully
       await Promise.all([
         video.play().catch(() => {}),
         pip.play().catch(() => {})
       ]);
-
-      cancelAnimationFrame(animRef.current);
-      if (idleTimerRef.current) clearInterval(idleTimerRef.current);
 
       const canvas = displayCanvasRef.current!;
       canvas.width  = canvas.parentElement!.clientWidth;
@@ -470,24 +472,35 @@ export const PlaygroundPage = () => {
       lastHandResult.current = null;
       lastVideoTime.current  = -1;
       setCameraOn(true);
-      renderLoop('camera');
     } catch (e: any) {
       setError(e?.message ?? 'Camera access denied.');
     } finally {
       setLoading(false);
     }
-  }, [initParticles, renderLoop]);
+  }, [initParticles]);
 
   // ── Stop camera ────────────────────────────────────────────────────────────
   const stopCamera = useCallback(() => {
-    cancelAnimationFrame(animRef.current);
-    streamRef.current?.getTracks().forEach(t => t.stop());
-    streamRef.current = null;
+    // Stop main stream tracks
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(t => t.stop());
+      streamRef.current = null;
+    }
+
+    // Stop and clear PiP video tracks (cloned stream)
+    if (pipVideoRef.current?.srcObject) {
+      const pipStream = pipVideoRef.current.srcObject as MediaStream;
+      pipStream.getTracks().forEach(t => t.stop());
+      pipVideoRef.current.srcObject = null;
+    }
+    
+    // Clear references to ensure hardware release
+    if (videoRef.current) videoRef.current.srcObject = null;
+
     setCameraOn(false);
     const c = displayCanvasRef.current;
     if (c) c.getContext('2d')!.clearRect(0, 0, c.width, c.height);
-    setTimeout(startIdleMode, 50);
-  }, [startIdleMode]);
+  }, []);
 
   // ── Mount: resize canvas, start model load, start idle ────────────────────
   useEffect(() => {
@@ -501,10 +514,8 @@ export const PlaygroundPage = () => {
       canvas.height = parent.clientHeight;
     };
 
-    // Use ResizeObserver for more robust sizing
     const obs = new ResizeObserver(() => {
       resize();
-      // If idle, refresh targets since H might have changed
       if (!cameraOn && particlesRef.current.length > 0) {
         const tgts = buildTextTargets(IDLE_PHRASES[idxRef.current % IDLE_PHRASES.length], canvas.width, canvas.height);
         setRawTargets(tgts);
@@ -512,18 +523,32 @@ export const PlaygroundPage = () => {
     });
     obs.observe(parent);
 
-    // Initial layout
     resize();
-    startIdleMode();
-
     loadModels();
+    
+    // Render loop orchestration
+    if (cameraOn) {
+      renderLoop('camera');
+    } else {
+      startIdleMode();
+      renderLoop('idle');
+    }
+
     return () => {
       obs.disconnect();
       cancelAnimationFrame(animRef.current);
       if (idleTimerRef.current) clearInterval(idleTimerRef.current);
-      streamRef.current?.getTracks().forEach(t => t.stop());
     };
-  }, [startIdleMode, loadModels, cameraOn, setRawTargets]);
+  }, [cameraOn, renderLoop, startIdleMode, loadModels, setRawTargets]);
+
+  // ── Hint cycling ──────────────────────────────────────────────────────────
+  useEffect(() => {
+    if (!cameraOn) return;
+    const itv = setInterval(() => {
+      setHintIdx(prev => (prev + 1) % HINTS.length);
+    }, 5000);
+    return () => clearInterval(itv);
+  }, [cameraOn]);
 
   // ── Mouse event wiring on canvas ──────────────────────────────────────────
   const onMouseMove = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
@@ -579,6 +604,50 @@ export const PlaygroundPage = () => {
         transition: 'box-shadow 0.8s ease, border-color 0.8s ease',
         zIndex: 1, cursor: 'crosshair',
       }}>
+        {/* HUD Indicator (top-left) */}
+        {cameraOn && (
+          <div style={{
+            position: 'absolute', top: 20, left: 20, zIndex: 10,
+            display: 'flex', flexDirection: 'column', gap: 6,
+            pointerEvents: 'none', userSelect: 'none'
+          }}>
+            <div style={{
+              display: 'flex', alignItems: 'center', gap: 10,
+              padding: '8px 14px', borderRadius: '6px',
+              background: 'rgba(124,58,237,0.08)', backdropFilter: 'blur(8px)',
+              border: '1px solid rgba(124,58,237,0.22)',
+              boxShadow: '0 4px 16px rgba(0,0,0,0.3)',
+            }}>
+              <div style={{
+                width: 5, height: 5, borderRadius: '50%',
+                background: '#a78bfa', boxShadow: '0 0 8px #a78bfa',
+                animation: 'pulse 2s infinite'
+              }} />
+              <span style={{
+                fontSize: '10px', fontFamily: 'monospace', color: 'rgba(255,255,255,0.85)',
+                letterSpacing: '0.1em', fontWeight: 600, textTransform: 'uppercase'
+              }}>
+                Interactive: Active
+              </span>
+            </div>
+            
+            <div style={{
+              padding: '10px 14px', borderRadius: '6px',
+              background: 'rgba(255,255,255,0.02)', backdropFilter: 'blur(4px)',
+              border: '1px solid rgba(255,255,255,0.05)',
+              minWidth: '220px', transition: 'all 0.5s ease'
+            }}>
+              <span style={{
+                display: 'block', fontSize: '11px', color: 'rgba(255,255,255,0.7)',
+                fontFamily: 'monospace', letterSpacing: '0.05em',
+                animation: 'fadeInOut 5s infinite'
+              }}>
+                {HINTS[hintIdx]}
+              </span>
+            </div>
+          </div>
+        )}
+
         {/* Hidden source video for MediaPipe (needs layout/dimensions) */}
         <video 
           ref={videoRef} 
@@ -696,6 +765,8 @@ export const PlaygroundPage = () => {
       <style>{`
         @keyframes blink { from { opacity:0.35; } to { opacity:1; } }
         @keyframes spin  { from { transform:rotate(0deg); } to { transform:rotate(360deg); } }
+        @keyframes pulse { 0% { opacity: 1; transform: scale(1); } 50% { opacity: 0.5; transform: scale(1.3); } 100% { opacity: 1; transform: scale(1); } }
+        @keyframes fadeInOut { 0% { opacity:0; transform: translateY(4px); } 10% { opacity:1; transform: translateY(0); } 90% { opacity:1; transform: translateY(0); } 100% { opacity:0; transform: translateY(-4px); } }
       `}</style>
     </div>
   );
