@@ -1,27 +1,107 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
+import {
+  FaceLandmarker,
+  HandLandmarker,
+  FilesetResolver,
+  type FaceLandmarkerResult,
+  type HandLandmarkerResult,
+} from '@mediapipe/tasks-vision';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
-// Higher resolution sample grid = sharper silhouette
-const SAMPLE_COLS = 120;
-const SAMPLE_ROWS = 80;
-// More particles = denser image
-const PARTICLE_COUNT = 12000;
+const PARTICLE_COUNT = 3500;
+const REPEL_RADIUS_SQ = 130 * 130;
+const REPEL_STRENGTH = 4.5;
+const DRAG_MULT      = 3.2;    // multiplier during mousedown
+const LERP_SPEED     = 0.07;   // how fast targets move (0=frozen, 1=instant)
 
-// ─── Particle ─────────────────────────────────────────────────────────────────
+// ─── Selected face landmark indices for interesting features ─────────────────
+// Eyes, brows, lips, jawline, nose — richer on expressive zones
+const FACE_LANDMARK_WEIGHTS: { idx: number; w: number }[] = [
+  // Left eye contour
+  ...[33,246,161,160,159,158,157,173,133,155,154,153,145,144,163,7].map(idx=>({idx,w:3})),
+  // Right eye contour
+  ...[362,398,384,385,386,387,388,466,263,249,390,373,374,380,381,382].map(idx=>({idx,w:3})),
+  // Lips outer
+  ...[61,185,40,39,37,0,267,269,270,409,291,375,321,405,314,17,84,181,91,146].map(idx=>({idx,w:4})),
+  // Nose bridge + tip
+  ...[168,6,197,195,5,4,1,19,94,2].map(idx=>({idx,w:2})),
+  // Jawline
+  ...[10,338,297,332,284,251,389,356,454,323,361,288,397,365,379,378,400,
+       377,152,148,176,149,150,136,172,58,132,93,234,127,162,21,54,103,67,109].map(idx=>({idx,w:1})),
+  // Forehead scattered
+  ...[10,151,9,8,107,66,105,63,70,156,143,116,117,118,119,120,121,128].map(idx=>({idx,w:1})),
+];
+
+// ─── Particle type ────────────────────────────────────────────────────────────
 interface Particle {
-  x: number; y: number;
-  tx: number; ty: number;
+  x: number; y: number;           // current position
+  tx: number; ty: number;         // smooth target
+  rawTx: number; rawTy: number;   // raw landmark target (lerped into tx/ty)
   vx: number; vy: number;
   size: number;
   alpha: number;
   baseHue: number;
 }
 
-// ─── Text → targets (idle) ───────────────────────────────────────────────────
-// Step=1 so we collect enough unique pixel positions for 12k particles to spread
+// ─── Gaussian spread helper ───────────────────────────────────────────────────
+function gaussianRand() {
+  // Box-Muller
+  return Math.sqrt(-2 * Math.log(Math.random())) * Math.cos(2 * Math.PI * Math.random());
+}
+
+// ─── Build targets from landmark results ─────────────────────────────────────
+function buildLandmarkTargets(
+  faceResult: FaceLandmarkerResult | null,
+  handResult: HandLandmarkerResult | null,
+  W: number,
+  H: number,
+): { tx: number; ty: number }[] {
+  const targets: { tx: number; ty: number }[] = [];
+
+  // Face landmarks
+  if (faceResult && faceResult.faceLandmarks.length > 0) {
+    const lm = faceResult.faceLandmarks[0];
+    for (const { idx, w } of FACE_LANDMARK_WEIGHTS) {
+      if (!lm[idx]) continue;
+      // Mirroring fix: Landmarks are 0-1 from CAMERA view,
+      // so we use (1.0 - x) to match the mirrored PiP preview.
+      const px = (1.0 - lm[idx].x) * W;
+      const py = lm[idx].y * H;
+      const sigma = 9; // Increased from 5
+      const count = w * 11; // Increased density
+      for (let k = 0; k < count; k++) {
+        targets.push({
+          tx: px + gaussianRand() * sigma,
+          ty: py + gaussianRand() * sigma,
+        });
+      }
+    }
+  }
+
+  // Hand landmarks
+  if (handResult && handResult.landmarks.length > 0) {
+    for (const hand of handResult.landmarks) {
+      for (const pt of hand) {
+        // Mirroring fix: flip X
+        const px = (1.0 - pt.x) * W;
+        const py = pt.y * H;
+        const sigma = 14; // Increased from 10
+        for (let k = 0; k < 15; k++) { // Increased from 10
+          targets.push({
+            tx: px + gaussianRand() * sigma,
+            ty: py + gaussianRand() * sigma,
+          });
+        }
+      }
+    }
+  }
+
+  return targets;
+}
+
+// ─── Build text targets (idle) ────────────────────────────────────────────────
 function buildTextTargets(text: string, W: number, H: number) {
   const off = document.createElement('canvas');
-  // Larger font so letters produce more pixel coverage
   const fs = Math.min(W * 0.25, H * 0.5, 160);
   off.width = W; off.height = H;
   const ctx = off.getContext('2d')!;
@@ -33,276 +113,325 @@ function buildTextTargets(text: string, W: number, H: number) {
   ctx.fillText(text, W / 2, H / 2);
   const { data } = ctx.getImageData(0, 0, W, H);
   const targets: { tx: number; ty: number }[] = [];
-  // Step=1 to capture every filled pixel → enough targets for 12k particles
   for (let y = 0; y < H; y++) {
     for (let x = 0; x < W; x++) {
-      const i = (y * W + x) * 4;
-      if (data[i + 3] > 100) targets.push({ tx: x, ty: y });
+      if (data[(y * W + x) * 4 + 3] > 100) targets.push({ tx: x, ty: y });
     }
   }
   return targets;
 }
 
-// ─── Video → targets (camera) ────────────────────────────────────────────────
-// Draw video DIRECTLY to a sample canvas here, return bright pixel positions
-function sampleVideoFrame(
-  video: HTMLVideoElement,
-  W: number,
-  H: number,
-): { tx: number; ty: number; bright: number }[] {
-  const off = document.createElement('canvas');
-  off.width = SAMPLE_COLS;
-  off.height = SAMPLE_ROWS;
-  const ctx = off.getContext('2d', { willReadFrequently: true })!;
-  // Mirror + draw
-  ctx.translate(SAMPLE_COLS, 0);
-  ctx.scale(-1, 1);
-  ctx.drawImage(video, 0, 0, SAMPLE_COLS, SAMPLE_ROWS);
-
-  const { data } = ctx.getImageData(0, 0, SAMPLE_COLS, SAMPLE_ROWS);
-  const targets: { tx: number; ty: number; bright: number }[] = [];
-
-  for (let row = 0; row < SAMPLE_ROWS; row++) {
-    for (let col = 0; col < SAMPLE_COLS; col++) {
-      const idx = (row * SAMPLE_COLS + col) * 4;
-      const r = data[idx], g = data[idx + 1], b = data[idx + 2];
-      const bright = (r * 0.299 + g * 0.587 + b * 0.114) / 255;
-      // Lowered threshold to capture more of the person
-      if (bright > 0.08) {
-        // Map to canvas coords — no extra jitter
-        targets.push({
-          tx: (col / SAMPLE_COLS) * W,
-          ty: (row / SAMPLE_ROWS) * H,
-          bright,
-        });
-      }
-    }
-  }
-  return targets;
-}
-
-// ─── Cycling idle phrases ─────────────────────────────────────────────────────
+// ─── Idle phrases ─────────────────────────────────────────────────────────────
 const IDLE_PHRASES = ['hi', '</>', '{ }', '*', 'hello'];
 
-// ─── Unick-style camera button ────────────────────────────────────────────────
-// Circular button with a ring, inner camera body rendered precisely
-const CameraButton = ({
-  loading,
-  onClick,
-}: {
-  loading: boolean;
-  onClick: () => void;
+// ─── Circular camera button ───────────────────────────────────────────────────
+const CameraButton = ({ loading, modelReady, onClick }: {
+  loading: boolean; modelReady: boolean; onClick: () => void;
 }) => {
   const [hovered, setHovered] = useState(false);
-
+  const busy = loading || !modelReady;
   return (
     <button
       onClick={onClick}
-      disabled={loading}
+      disabled={busy}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{
-        position: 'relative',
-        width: 80,
-        height: 80,
-        borderRadius: '50%',
-        border: `1px solid ${hovered ? 'rgba(255,255,255,0.6)' : 'rgba(255,255,255,0.18)'}`,
-        background: hovered
-          ? 'rgba(255,255,255,0.08)'
-          : 'rgba(255,255,255,0.03)',
-        cursor: loading ? 'wait' : 'pointer',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: 6,
-        transition: 'all 0.3s ease',
-        backdropFilter: 'blur(12px)',
-        boxShadow: hovered
-          ? '0 0 0 1px rgba(255,255,255,0.08), 0 8px 32px rgba(0,0,0,0.4)'
-          : '0 0 0 1px rgba(255,255,255,0.03)',
-        opacity: loading ? 0.5 : 1,
+        position: 'relative', width: 80, height: 80, borderRadius: '50%',
+        border: `1px solid ${hovered && !busy ? 'rgba(255,255,255,0.55)' : 'rgba(255,255,255,0.16)'}`,
+        background: hovered && !busy ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.03)',
+        cursor: busy ? 'wait' : 'pointer',
+        display: 'flex', flexDirection: 'column', alignItems: 'center',
+        justifyContent: 'center', gap: 6,
+        transition: 'all 0.3s ease', backdropFilter: 'blur(12px)',
+        boxShadow: hovered && !busy ? '0 0 0 1px rgba(255,255,255,0.07), 0 8px 32px rgba(0,0,0,0.4)' : 'none',
+        opacity: busy ? 0.45 : 1,
       }}
     >
-      {/* Animated ring on hover */}
-      <div
-        style={{
-          position: 'absolute',
-          inset: -4,
-          borderRadius: '50%',
-          border: '1px solid rgba(255,255,255,0.15)',
-          transform: hovered ? 'scale(1)' : 'scale(0.9)',
-          opacity: hovered ? 1 : 0,
-          transition: 'all 0.35s ease',
-        }}
-      />
-      {/* Camera icon — clean minimal lines */}
-      <svg
-        width="26"
-        height="21"
-        viewBox="0 0 26 21"
-        fill="none"
-        style={{ color: hovered ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.45)', transition: 'color 0.3s' }}
-      >
-        {/* Body */}
-        <rect x="1" y="5.5" width="24" height="14" rx="2.5" stroke="currentColor" strokeWidth="1.3"/>
-        {/* Lens */}
-        <circle cx="13" cy="12.5" r="4" stroke="currentColor" strokeWidth="1.3"/>
-        {/* Inner lens ring */}
-        <circle cx="13" cy="12.5" r="1.6" stroke="currentColor" strokeWidth="1"/>
-        {/* Viewfinder bump */}
-        <path d="M9 5.5V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v1.5" stroke="currentColor" strokeWidth="1.3"/>
-        {/* Flash corner dot */}
-        <circle cx="21" cy="9" r="1" fill="currentColor" opacity="0.6"/>
-      </svg>
-      {/* Label */}
-      <span
-        style={{
-          fontSize: '8px',
-          fontFamily: 'monospace',
-          letterSpacing: '0.12em',
-          textTransform: 'uppercase',
-          color: hovered ? 'rgba(255,255,255,0.7)' : 'rgba(255,255,255,0.25)',
-          transition: 'color 0.3s',
-          lineHeight: 1,
-        }}
-      >
-        {loading ? '...' : 'camera'}
+      <div style={{
+        position: 'absolute', inset: -5, borderRadius: '50%',
+        border: '1px solid rgba(255,255,255,0.13)',
+        transform: hovered && !busy ? 'scale(1)' : 'scale(0.88)',
+        opacity: hovered && !busy ? 1 : 0,
+        transition: 'all 0.35s ease',
+      }} />
+      {loading ? (
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none" style={{ animation: 'spin 1s linear infinite' }}>
+          <circle cx="11" cy="11" r="9" stroke="rgba(255,255,255,0.25)" strokeWidth="1.5"/>
+          <path d="M11 2 A9 9 0 0 1 20 11" stroke="rgba(255,255,255,0.7)" strokeWidth="1.5" strokeLinecap="round"/>
+        </svg>
+      ) : (
+        <svg width="26" height="21" viewBox="0 0 26 21" fill="none"
+          style={{ color: hovered ? 'rgba(255,255,255,0.88)' : 'rgba(255,255,255,0.4)', transition: 'color 0.3s' }}>
+          <rect x="1" y="5.5" width="24" height="14" rx="2.5" stroke="currentColor" strokeWidth="1.3"/>
+          <circle cx="13" cy="12.5" r="4" stroke="currentColor" strokeWidth="1.3"/>
+          <circle cx="13" cy="12.5" r="1.6" stroke="currentColor" strokeWidth="1"/>
+          <path d="M9 5.5V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v1.5" stroke="currentColor" strokeWidth="1.3"/>
+          <circle cx="21" cy="9" r="1" fill="currentColor" opacity="0.55"/>
+        </svg>
+      )}
+      <span style={{
+        fontSize: '8px', fontFamily: 'monospace', letterSpacing: '0.12em',
+        textTransform: 'uppercase', lineHeight: 1,
+        color: hovered && !busy ? 'rgba(255,255,255,0.65)' : 'rgba(255,255,255,0.22)',
+        transition: 'color 0.3s',
+      }}>
+        {loading ? 'loading' : !modelReady ? 'init…' : 'camera'}
       </span>
     </button>
   );
 };
 
-// ─── Main Component ───────────────────────────────────────────────────────────
+// ─── Main ─────────────────────────────────────────────────────────────────────
 export const PlaygroundPage = () => {
   const displayCanvasRef = useRef<HTMLCanvasElement>(null);
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const pipVideoRef = useRef<HTMLVideoElement>(null);
-  const streamRef = useRef<MediaStream | null>(null);
-  const particlesRef = useRef<Particle[]>([]);
-  const animRef = useRef<number>(0);
-  const frameCountRef = useRef(0);
-  const idlePhraseIndexRef = useRef(0);
-  const idleTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const videoRef         = useRef<HTMLVideoElement>(null);
+  const pipVideoRef      = useRef<HTMLVideoElement>(null);
+  const streamRef        = useRef<MediaStream | null>(null);
+  const animRef          = useRef<number>(0);
+  const particlesRef     = useRef<Particle[]>([]);
+  const idleTimerRef     = useRef<ReturnType<typeof setInterval> | null>(null);
+  const idxRef           = useRef(0);
 
-  const [cameraOn, setCameraOn] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
+  // MediaPipe refs
+  const faceLandmarkerRef = useRef<FaceLandmarker | null>(null);
+  const handLandmarkerRef = useRef<HandLandmarker | null>(null);
+  const lastFaceResult    = useRef<FaceLandmarkerResult | null>(null);
+  const lastHandResult    = useRef<HandLandmarkerResult | null>(null);
+  const lastVideoTime     = useRef(-1);
+  const lastTrackingTime  = useRef(0);
 
-  // ── Init particles scattered randomly ──────────────────────────────────────
+  // Mouse repulsion state
+  const mouseRef   = useRef({ x: -9999, y: -9999, down: false });
+
+  const [cameraOn,   setCameraOn]   = useState(false);
+  const [modelReady, setModelReady] = useState(false);
+  const [loading,    setLoading]    = useState(false);
+  const [error,      setError]      = useState<string | null>(null);
+
+  // ── Init particles ──────────────────────────────────────────────────────────
   const initParticles = useCallback((W: number, H: number) => {
-    particlesRef.current = Array.from({ length: PARTICLE_COUNT }, () => ({
-      x: Math.random() * W,
-      y: Math.random() * H,
-      tx: Math.random() * W,
-      ty: Math.random() * H,
-      vx: 0, vy: 0,
-      size: Math.random() * 1.4 + 0.6,
-      alpha: Math.random() * 0.4 + 0.5,
-      baseHue: 200 + Math.random() * 140, // blue-violet-magenta
-    }));
-  }, []);
-
-  // ── Assign text targets ────────────────────────────────────────────────────
-  const assignTextTargets = useCallback((phrase: string, W: number, H: number) => {
-    const tgts = buildTextTargets(phrase, W, H);
-    if (!tgts.length) return;
-    particlesRef.current.forEach((p, i) => {
-      const t = tgts[i % tgts.length];
-      p.tx = t.tx + (Math.random() - 0.5) * 4;
-      p.ty = t.ty + (Math.random() - 0.5) * 4;
+    particlesRef.current = Array.from({ length: PARTICLE_COUNT }, () => {
+      const x = Math.random() * W, y = Math.random() * H;
+      return {
+        x, y, tx: x, ty: y, rawTx: x, rawTy: y,
+        vx: 0, vy: 0,
+        size:    Math.random() * 1.4 + 0.5,
+        alpha:   Math.random() * 0.35 + 0.55,
+        baseHue: 210 + Math.random() * 130,
+      };
     });
   }, []);
 
-  // ── Idle loop ──────────────────────────────────────────────────────────────
-  const idleLoop = useCallback(() => {
+  // ── Apply new raw targets → they lerp each frame ───────────────────────────
+  const setRawTargets = useCallback((tgts: { tx: number; ty: number }[]) => {
+    if (!tgts.length) return;
+    const pCount  = particlesRef.current.length;
+    const tCount  = tgts.length;
+    
+    particlesRef.current.forEach((p, i) => {
+      // Uniform sampling: pick a target point based on current particle index ratio.
+      // This ensures full shape representation even if pCount < tCount.
+      const targetIdx = Math.floor((i / pCount) * tCount);
+      const t = tgts[targetIdx % tCount];
+      p.rawTx = t.tx;
+      p.rawTy = t.ty;
+    });
+  }, []);
+
+  // ── Mouse repulsion force ──────────────────────────────────────────────────
+  const applyMouseRepulsion = (p: Particle, mult = 1) => {
+    const mx = mouseRef.current.x, my = mouseRef.current.y;
+    const dx = p.x - mx, dy = p.y - my;
+    const distSq = dx * dx + dy * dy;
+    if (distSq < REPEL_RADIUS_SQ && distSq > 0.01) {
+      const dist = Math.sqrt(distSq);
+      const force = Math.pow(1 - dist / 130, 2) * REPEL_STRENGTH * mult;
+      p.vx += (dx / dist) * force;
+      p.vy += (dy / dist) * force;
+    }
+  };
+
+  // ── Render loop (shared idle + camera) ────────────────────────────────────
+  const renderLoop = useCallback((mode: 'idle' | 'camera') => {
     const canvas = displayCanvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d')!;
     const W = canvas.width, H = canvas.height;
 
-    // Faster fade = crispier shape
-    ctx.fillStyle = 'rgba(8,7,14,0.25)';
+    // If camera mode, run MediaPipe on current video frame
+    if (mode === 'camera') {
+      const video = videoRef.current;
+      if (video && video.readyState >= 2 && video.currentTime !== lastVideoTime.current) {
+        // Performance fix: Throttle MediaPipe to ~30fps even if render loop is 60fps
+        const now = performance.now();
+        if (now - (lastTrackingTime.current || 0) > 32) {
+          lastTrackingTime.current = now;
+          lastVideoTime.current = video.currentTime;
+          
+          if (faceLandmarkerRef.current) {
+            try { 
+              lastFaceResult.current = faceLandmarkerRef.current.detectForVideo(video, now); 
+            } catch {}
+          }
+          if (handLandmarkerRef.current) {
+            try { 
+              lastHandResult.current = handLandmarkerRef.current.detectForVideo(video, now); 
+            } catch {}
+          }
+          const tgts = buildLandmarkTargets(lastFaceResult.current, lastHandResult.current, W, H);
+          if (tgts.length > 0) setRawTargets(tgts);
+        }
+      }
+    }
+
+    // Trail fade
+    ctx.fillStyle = 'rgba(8,7,14,0.22)';
     ctx.fillRect(0, 0, W, H);
 
-    particlesRef.current.forEach(p => {
-      const dx = p.tx - p.x, dy = p.ty - p.y;
-      p.vx = (p.vx + dx * 0.06) * 0.84;
-      p.vy = (p.vy + dy * 0.06) * 0.84;
-      p.x += p.vx; p.y += p.vy;
-      const speed = Math.hypot(p.vx, p.vy);
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-      ctx.fillStyle = `hsla(${p.baseHue + speed * 4},80%,72%,${p.alpha})`;
-      ctx.fill();
-    });
-    animRef.current = requestAnimationFrame(idleLoop);
-  }, []);
+    const dragMult = mouseRef.current.down ? DRAG_MULT : 1;
 
-  const startIdleMode = useCallback(() => {
-    const canvas = displayCanvasRef.current;
-    if (!canvas) return;
-    const { width: W, height: H } = canvas;
-    initParticles(W, H);
-    assignTextTargets(IDLE_PHRASES[0], W, H);
-    idlePhraseIndexRef.current = 0;
-    idleLoop();
-
-    idleTimerRef.current = setInterval(() => {
-      idlePhraseIndexRef.current = (idlePhraseIndexRef.current + 1) % IDLE_PHRASES.length;
-      const c = displayCanvasRef.current;
-      if (c) assignTextTargets(IDLE_PHRASES[idlePhraseIndexRef.current], c.width, c.height);
-    }, 3200);
-  }, [initParticles, assignTextTargets, idleLoop]);
-
-  // ── Camera loop ────────────────────────────────────────────────────────────
-  const cameraLoop = useCallback(() => {
-    const canvas = displayCanvasRef.current;
-    const video = videoRef.current;
-    if (!canvas || !video || video.readyState < 2) {
-      animRef.current = requestAnimationFrame(cameraLoop);
-      return;
-    }
-    const ctx = canvas.getContext('2d')!;
-    const W = canvas.width, H = canvas.height;
-
-    // Sample every frame for maximum responsiveness
-    if (frameCountRef.current % 2 === 0) {
-      const targets = sampleVideoFrame(video, W, H);
-      if (targets.length > 0) {
-        particlesRef.current.forEach((p, i) => {
-          const t = targets[i % targets.length];
-          // All particles always chase a target → no stale positions
-          p.tx = t.tx;
-          p.ty = t.ty;
+    // Interaction points for repulsion (Face + Hands)
+    const interactPoints: { x: number; y: number; r: number; f: number }[] = [];
+    if (mode === 'camera') {
+      // Hand tips repulsion
+      if (lastHandResult.current?.landmarks) {
+        lastHandResult.current.landmarks.forEach(hand => {
+          // Tip of index finger (idx 8) and palm center (idx 0)
+          [0, 8, 12].forEach(idx => {
+            if (hand[idx]) {
+              interactPoints.push({
+                x: (1.0 - hand[idx].x) * W,
+                y: hand[idx].y * H,
+                r: 100, // radius
+                f: 4.0  // strength
+              });
+            }
+          });
+        });
+      }
+      // Face center repulsion (nose tip idx 1)
+      if (lastFaceResult.current?.faceLandmarks?.[0]?.[1]) {
+        const nose = lastFaceResult.current.faceLandmarks[0][1];
+        interactPoints.push({
+          x: (1.0 - nose.x) * W,
+          y: nose.y * H,
+          r: 150,
+          f: 3.0
         });
       }
     }
-    frameCountRef.current++;
-
-    // Quick trail fade so old positions don't linger
-    ctx.fillStyle = 'rgba(8,7,14,0.28)';
-    ctx.fillRect(0, 0, W, H);
 
     particlesRef.current.forEach(p => {
+      // Lerp toward raw target (smooth, no jump)
+      p.tx += (p.rawTx - p.tx) * LERP_SPEED;
+      p.ty += (p.rawTy - p.ty) * LERP_SPEED;
+
       const dx = p.tx - p.x, dy = p.ty - p.y;
-      // Stronger spring for tighter clustering
-      p.vx = (p.vx + dx * 0.055) * 0.87;
-      p.vy = (p.vy + dy * 0.055) * 0.87;
-      p.x += p.vx; p.y += p.vy;
-      const speed = Math.hypot(p.vx, p.vy);
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-      // White-hot core at high speed, cool violet at rest
-      const lightness = Math.min(60 + speed * 4, 92);
-      const saturation = Math.max(90 - speed * 3, 55);
-      ctx.fillStyle = `hsla(${p.baseHue + speed * 6},${saturation}%,${lightness}%,${p.alpha})`;
-      ctx.fill();
+      p.vx = (p.vx + dx * 0.05) * 0.85;
+      p.vy = (p.vy + dy * 0.05) * 0.85;
+
+      // Mouse repulsion
+      applyMouseRepulsion(p, dragMult);
+
+      // Landmark repulsion (Physical Interaction)
+      interactPoints.forEach(pt => {
+        const pdx = p.x - pt.x, pdy = p.y - pt.y;
+        const dSq = pdx * pdx + pdy * pdy;
+        if (dSq < pt.r * pt.r && dSq > 0.01) {
+          const d = Math.sqrt(dSq);
+          const force = Math.pow(1 - d / pt.r, 2) * pt.f;
+          p.vx += (pdx / d) * force;
+          p.vy += (pdy / d) * force;
+        }
+      });
+
+      p.x += p.vx;
+      p.y += p.vy;
+      p.x = Math.max(-20, Math.min(W + 20, p.x));
+      p.y = Math.max(-20, Math.min(H + 20, p.y));
+
+      const vx = p.vx, vy = p.vy;
+      const speedSq = vx * vx + vy * vy;
+      
+      if (speedSq > 0.01) {
+        const speed = Math.sqrt(speedSq);
+        const lightness = Math.min(58 + speed * 5, 90);
+        const s = p.size * (1 + speed * 0.1);
+        ctx.fillStyle = `hsla(${p.baseHue + speed * 5},78%,${lightness}%,${p.alpha})`;
+        ctx.fillRect(p.x - s / 2, p.y - s / 2, s, s);
+      } else {
+        ctx.fillStyle = `hsla(${p.baseHue},78%,58%,${p.alpha})`;
+        ctx.fillRect(p.x - p.size / 2, p.y - p.size / 2, p.size, p.size);
+      }
     });
 
-    animRef.current = requestAnimationFrame(cameraLoop);
+    animRef.current = requestAnimationFrame(() => renderLoop(mode));
+  }, [setRawTargets]);
+
+  // ── Idle mode ──────────────────────────────────────────────────────────────
+  // ── Idle mode ──────────────────────────────────────────────────────────────
+  const startIdleMode = useCallback(() => {
+    const canvas = displayCanvasRef.current;
+    if (!canvas) return;
+    
+    // Initial particle distribution across current canvas dimensions
+    initParticles(canvas.width, canvas.height);
+
+    const applyCurrentPhrase = () => {
+      const c = displayCanvasRef.current;
+      if (!c) return;
+      const tgts = buildTextTargets(IDLE_PHRASES[idxRef.current % IDLE_PHRASES.length], c.width, c.height);
+      if (tgts.length) setRawTargets(tgts);
+    };
+
+    idxRef.current = 0;
+    applyCurrentPhrase();
+    renderLoop('idle');
+
+    if (idleTimerRef.current) clearInterval(idleTimerRef.current);
+    idleTimerRef.current = setInterval(() => {
+      idxRef.current = (idxRef.current + 1) % IDLE_PHRASES.length;
+      applyCurrentPhrase();
+    }, 3200);
+  }, [initParticles, setRawTargets, renderLoop]);
+
+  // ── Load MediaPipe models ──────────────────────────────────────────────────
+  const loadModels = useCallback(async () => {
+    if (faceLandmarkerRef.current) return; // already loaded
+    try {
+      const vision = await FilesetResolver.forVisionTasks(
+        'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/wasm'
+      );
+      const [face, hand] = await Promise.all([
+        FaceLandmarker.createFromOptions(vision, {
+          baseOptions: {
+            modelAssetPath: 'https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task',
+            delegate: 'GPU',
+          },
+          outputFaceBlendshapes: false,
+          runningMode: 'VIDEO',
+          numFaces: 1,
+        }),
+        HandLandmarker.createFromOptions(vision, {
+          baseOptions: {
+            modelAssetPath: 'https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task',
+            delegate: 'GPU',
+          },
+          runningMode: 'VIDEO',
+          numHands: 2,
+        }),
+      ]);
+      faceLandmarkerRef.current = face;
+      handLandmarkerRef.current = hand;
+      setModelReady(true);
+    } catch (e) {
+      console.warn('[MediaPipe] Failed to load, will use fallback:', e);
+      setModelReady(true); // still allow camera with fallback
+    }
   }, []);
 
+  // ── Start camera ───────────────────────────────────────────────────────────
   const startCamera = useCallback(async () => {
     setLoading(true);
     setError(null);
@@ -311,198 +440,244 @@ export const PlaygroundPage = () => {
         video: { width: { ideal: 640 }, height: { ideal: 480 }, facingMode: 'user' },
       });
       streamRef.current = stream;
-
       const video = videoRef.current!;
+      video.width = 640;  // Explicit for MediaPipe
+      video.height = 480; // Explicit for MediaPipe
       video.srcObject = stream;
-      await video.play();
-
+      
       const pip = pipVideoRef.current!;
-      pip.srcObject = stream;
-      await pip.play();
+      pip.width = 640;  // Match dimensions
+      pip.height = 480;
+      // Clone the stream for the second video to avoid resource contention
+      const pipStream = stream.clone();
+      pip.srcObject = pipStream;
+
+      // Ensure both play successfully
+      await Promise.all([
+        video.play().catch(() => {}),
+        pip.play().catch(() => {})
+      ]);
 
       cancelAnimationFrame(animRef.current);
       if (idleTimerRef.current) clearInterval(idleTimerRef.current);
 
       const canvas = displayCanvasRef.current!;
-      canvas.width = canvas.parentElement!.clientWidth;
+      canvas.width  = canvas.parentElement!.clientWidth;
       canvas.height = canvas.parentElement!.clientHeight;
 
       initParticles(canvas.width, canvas.height);
+      lastFaceResult.current = null;
+      lastHandResult.current = null;
+      lastVideoTime.current  = -1;
       setCameraOn(true);
-      frameCountRef.current = 0;
-      cameraLoop();
+      renderLoop('camera');
     } catch (e: any) {
       setError(e?.message ?? 'Camera access denied.');
     } finally {
       setLoading(false);
     }
-  }, [initParticles, cameraLoop]);
+  }, [initParticles, renderLoop]);
 
+  // ── Stop camera ────────────────────────────────────────────────────────────
   const stopCamera = useCallback(() => {
     cancelAnimationFrame(animRef.current);
     streamRef.current?.getTracks().forEach(t => t.stop());
     streamRef.current = null;
     setCameraOn(false);
-    const canvas = displayCanvasRef.current;
-    if (canvas) canvas.getContext('2d')!.clearRect(0, 0, canvas.width, canvas.height);
+    const c = displayCanvasRef.current;
+    if (c) c.getContext('2d')!.clearRect(0, 0, c.width, c.height);
     setTimeout(startIdleMode, 50);
   }, [startIdleMode]);
 
+  // ── Mount: resize canvas, start model load, start idle ────────────────────
   useEffect(() => {
     const canvas = displayCanvasRef.current;
     if (!canvas) return;
-    canvas.width = canvas.parentElement!.clientWidth;
-    canvas.height = canvas.parentElement!.clientHeight;
+    const parent = canvas.parentElement!;
+
+    const resize = () => {
+      if (!parent) return;
+      canvas.width  = parent.clientWidth;
+      canvas.height = parent.clientHeight;
+    };
+
+    // Use ResizeObserver for more robust sizing
+    const obs = new ResizeObserver(() => {
+      resize();
+      // If idle, refresh targets since H might have changed
+      if (!cameraOn && particlesRef.current.length > 0) {
+        const tgts = buildTextTargets(IDLE_PHRASES[idxRef.current % IDLE_PHRASES.length], canvas.width, canvas.height);
+        setRawTargets(tgts);
+      }
+    });
+    obs.observe(parent);
+
+    // Initial layout
+    resize();
     startIdleMode();
+
+    loadModels();
     return () => {
+      obs.disconnect();
       cancelAnimationFrame(animRef.current);
       if (idleTimerRef.current) clearInterval(idleTimerRef.current);
       streamRef.current?.getTracks().forEach(t => t.stop());
     };
-  }, [startIdleMode]);
+  }, [startIdleMode, loadModels, cameraOn, setRawTargets]);
 
+  // ── Mouse event wiring on canvas ──────────────────────────────────────────
+  const onMouseMove = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
+    const r = e.currentTarget.getBoundingClientRect();
+    // Scale from CSS pixel to canvas pixel
+    const scaleX = e.currentTarget.width  / r.width;
+    const scaleY = e.currentTarget.height / r.height;
+    mouseRef.current.x = (e.clientX - r.left) * scaleX;
+    mouseRef.current.y = (e.clientY - r.top)  * scaleY;
+  }, []);
+  const onMouseLeave = useCallback(() => {
+    mouseRef.current.x = -9999; mouseRef.current.y = -9999;
+    mouseRef.current.down = false;
+  }, []);
+  const onMouseDown  = useCallback(() => { mouseRef.current.down = true;  }, []);
+  const onMouseUp    = useCallback(() => { mouseRef.current.down = false; }, []);
+
+  // ─── Render ────────────────────────────────────────────────────────────────
   return (
     <div style={{
-      minHeight: '100vh',
-      background: '#08070e',
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      paddingTop: '80px',
-      paddingBottom: '60px',
-      color: 'white',
-      overflow: 'hidden',
+      minHeight: '100vh', background: '#08070e',
+      display: 'flex', flexDirection: 'column', alignItems: 'center',
+      paddingTop: '80px', paddingBottom: '60px', color: 'white', overflow: 'hidden',
     }}>
-
       {/* Header */}
       <div style={{ textAlign: 'center', marginBottom: '28px', zIndex: 2 }}>
         <p style={{ fontFamily: 'monospace', fontSize: '10px', letterSpacing: '0.45em', color: 'rgba(124,58,237,0.6)', textTransform: 'uppercase', marginBottom: '10px' }}>
           ◈ Playground
         </p>
         <h1 style={{
-          fontSize: 'clamp(1.8rem, 4.5vw, 3.4rem)',
-          fontWeight: 900, letterSpacing: '-0.04em',
+          fontSize: 'clamp(1.8rem, 4.5vw, 3.4rem)', fontWeight: 900, letterSpacing: '-0.04em',
           background: 'linear-gradient(135deg, #fff 0%, #a78bfa 55%, #38bdf8 100%)',
-          WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
-          marginBottom: '8px',
+          WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', marginBottom: '8px',
         }}>
           Particle Mirror
         </h1>
-        <p style={{ fontSize: '13px', color: 'rgba(255,255,255,0.3)', maxWidth: '340px', lineHeight: 1.65 }}>
+        <p style={{ fontSize: '13px', color: 'rgba(255,255,255,0.28)', maxWidth: '360px', lineHeight: 1.65 }}>
           {cameraOn
-            ? 'Your silhouette — rendered as particles in real time.'
-            : 'Grant camera access to see yourself in particles.'}
+            ? 'Face & hands tracked as particles. Drag to scatter.'
+            : 'Move your cursor through the particles — grant camera to see yourself.'}
         </p>
       </div>
 
       {/* Canvas container */}
       <div style={{
-        position: 'relative',
-        width: '90vw', maxWidth: '860px',
-        aspectRatio: '16/10',
-        borderRadius: '12px',
-        overflow: 'hidden',
-        border: cameraOn ? '1px solid rgba(124,58,237,0.4)' : '1px solid rgba(255,255,255,0.05)',
+        position: 'relative', width: '90vw', maxWidth: '860px',
+        aspectRatio: '16/10', borderRadius: '12px', overflow: 'hidden',
+        border: cameraOn ? '1px solid rgba(124,58,237,0.38)' : '1px solid rgba(255,255,255,0.05)',
         background: '#0b0a17',
         boxShadow: cameraOn
-          ? '0 0 80px rgba(124,58,237,0.15), 0 0 160px rgba(56,189,248,0.06)'
-          : '0 0 30px rgba(124,58,237,0.06)',
+          ? '0 0 80px rgba(124,58,237,0.14), 0 0 180px rgba(56,189,248,0.05)'
+          : '0 0 28px rgba(124,58,237,0.06)',
         transition: 'box-shadow 0.8s ease, border-color 0.8s ease',
-        zIndex: 1,
+        zIndex: 1, cursor: 'crosshair',
       }}>
-        {/* Hidden video for sampling */}
-        <video ref={videoRef} muted playsInline style={{ display: 'none' }} />
+        {/* Hidden source video for MediaPipe (needs layout/dimensions) */}
+        <video 
+          ref={videoRef} 
+          muted 
+          autoPlay
+          playsInline 
+          style={{ 
+            position: 'absolute', 
+            top: 0, 
+            left: 0, 
+            width: '640px', 
+            height: '480px', 
+            opacity: 0, 
+            pointerEvents: 'none',
+            zIndex: -1 
+          }} 
+        />
 
-        {/* Particle canvas */}
-        <canvas ref={displayCanvasRef} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }} />
+        <canvas
+          ref={displayCanvasRef}
+          style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}
+          onMouseMove={onMouseMove}
+          onMouseLeave={onMouseLeave}
+          onMouseDown={onMouseDown}
+          onMouseUp={onMouseUp}
+        />
 
-        {/* PiP — live camera preview bottom-right */}
+        {/* PiP preview */}
         <div style={{
           position: 'absolute', bottom: 14, right: 14,
-          width: 'clamp(90px, 13vw, 160px)',
-          aspectRatio: '4/3',
+          width: 'clamp(88px, 12vw, 155px)', aspectRatio: '4/3',
           borderRadius: '8px', overflow: 'hidden',
-          border: '1px solid rgba(255,255,255,0.12)',
+          border: '1px solid rgba(255,255,255,0.1)',
           boxShadow: '0 4px 20px rgba(0,0,0,0.7)',
           opacity: cameraOn ? 1 : 0,
-          transform: cameraOn ? 'scale(1) translateY(0)' : 'scale(0.9) translateY(6px)',
-          transition: 'opacity 0.5s ease, transform 0.5s ease',
+          transform: cameraOn ? 'translateY(0) scale(1)' : 'translateY(6px) scale(0.9)',
+          transition: 'opacity 0.45s ease, transform 0.45s ease',
           background: '#000', zIndex: 3,
         }}>
-          <video ref={pipVideoRef} muted playsInline
+          <video ref={pipVideoRef} muted autoPlay playsInline
             style={{ width: '100%', height: '100%', objectFit: 'cover', transform: 'scaleX(-1)' }}
           />
-          <div style={{
-            position: 'absolute', inset: 0,
-            background: 'linear-gradient(135deg, rgba(124,58,237,0.12), transparent)',
-            pointerEvents: 'none',
-          }} />
-          {/* live label */}
-          <div style={{
-            position: 'absolute', top: 6, left: 8,
-            fontSize: '8px', fontFamily: 'monospace',
-            color: 'rgba(255,255,255,0.4)', letterSpacing: '0.15em', textTransform: 'uppercase',
-          }}>
-            live
-          </div>
-          {/* rec dot */}
-          <div style={{
-            position: 'absolute', top: 8, right: 8,
-            width: 5, height: 5, borderRadius: '50%',
-            background: '#ef4444', boxShadow: '0 0 5px #ef4444',
-            animation: 'blink 1.2s ease-in-out infinite alternate',
-          }} />
+          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(135deg, rgba(124,58,237,0.1), transparent)', pointerEvents: 'none' }} />
+          <div style={{ position: 'absolute', top: 6, left: 8, fontSize: '8px', fontFamily: 'monospace', color: 'rgba(255,255,255,0.35)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>live</div>
+          <div style={{ position: 'absolute', top: 8, right: 8, width: 5, height: 5, borderRadius: '50%', background: '#ef4444', boxShadow: '0 0 5px #ef4444', animation: 'blink 1.2s ease-in-out infinite alternate' }} />
         </div>
 
         {/* Corner brackets */}
         {(['tl','tr','bl','br'] as const).map(p => (
           <div key={p} style={{
             position: 'absolute', width: 16, height: 16,
-            ...(p[0] === 't' ? { top: 10 } : { bottom: 10 }),
-            ...(p[1] === 'l' ? { left: 10 } : { right: 10 }),
-            borderTop: p[0] === 't' ? '1px solid rgba(124,58,237,0.35)' : 'none',
-            borderBottom: p[0] === 'b' ? '1px solid rgba(124,58,237,0.35)' : 'none',
-            borderLeft: p[1] === 'l' ? '1px solid rgba(124,58,237,0.35)' : 'none',
-            borderRight: p[1] === 'r' ? '1px solid rgba(124,58,237,0.35)' : 'none',
+            ...(p[0]==='t' ? { top: 10 } : { bottom: 10 }),
+            ...(p[1]==='l' ? { left: 10 } : { right: 10 }),
+            borderTop:    p[0]==='t' ? '1px solid rgba(124,58,237,0.3)' : 'none',
+            borderBottom: p[0]==='b' ? '1px solid rgba(124,58,237,0.3)' : 'none',
+            borderLeft:   p[1]==='l' ? '1px solid rgba(124,58,237,0.3)' : 'none',
+            borderRight:  p[1]==='r' ? '1px solid rgba(124,58,237,0.3)' : 'none',
           }} />
         ))}
+
+        {/* Cursor hint (idle) */}
+        {!cameraOn && (
+          <div style={{
+            position: 'absolute', bottom: 14, left: '50%', transform: 'translateX(-50%)',
+            fontSize: '9px', fontFamily: 'monospace', color: 'rgba(255,255,255,0.15)',
+            letterSpacing: '0.1em', pointerEvents: 'none',
+          }}>
+            ✦ move cursor · click + drag to pull
+          </div>
+        )}
       </div>
 
       {/* Controls */}
       <div style={{ marginTop: '28px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px', zIndex: 2 }}>
         {!cameraOn ? (
-          <CameraButton loading={loading} onClick={startCamera} />
+          <CameraButton loading={loading} modelReady={modelReady} onClick={startCamera} />
         ) : (
           <button
             onClick={stopCamera}
             style={{
               display: 'flex', alignItems: 'center', gap: '8px',
               padding: '10px 22px', borderRadius: '100px',
-              border: '1px solid rgba(239,68,68,0.35)',
-              background: 'rgba(239,68,68,0.06)',
-              color: 'rgba(255,120,120,0.8)',
-              fontSize: '10px', fontFamily: 'monospace',
-              letterSpacing: '0.15em', textTransform: 'uppercase',
+              border: '1px solid rgba(239,68,68,0.32)', background: 'rgba(239,68,68,0.05)',
+              color: 'rgba(255,120,120,0.78)', fontSize: '10px',
+              fontFamily: 'monospace', letterSpacing: '0.15em', textTransform: 'uppercase',
               cursor: 'pointer', transition: 'all 0.3s ease',
             }}
-            onMouseEnter={e => (e.currentTarget.style.background = 'rgba(239,68,68,0.14)')}
-            onMouseLeave={e => (e.currentTarget.style.background = 'rgba(239,68,68,0.06)')}
+            onMouseEnter={e => (e.currentTarget.style.background = 'rgba(239,68,68,0.12)')}
+            onMouseLeave={e => (e.currentTarget.style.background = 'rgba(239,68,68,0.05)')}
           >
-            <span style={{
-              width: 7, height: 7, borderRadius: '50%', background: '#ef4444',
-              boxShadow: '0 0 5px #ef4444', display: 'inline-block',
-              animation: 'blink 1s ease-in-out infinite alternate',
-            }} />
+            <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#ef4444', boxShadow: '0 0 5px #ef4444', display: 'inline-block', animation: 'blink 1s ease-in-out infinite alternate' }} />
             stop
           </button>
         )}
 
         {cameraOn && (
-          <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap', justifyContent: 'center', marginTop: '4px' }}>
-            {['↑ move closer', '◑ contrast matters', '✦ stay still to sharpen'].map(t => (
-              <span key={t} style={{ fontSize: '10px', color: 'rgba(255,255,255,0.2)', fontFamily: 'monospace', letterSpacing: '0.04em' }}>
-                {t}
-              </span>
+          <div style={{ display: 'flex', gap: '18px', flexWrap: 'wrap', justifyContent: 'center', marginTop: '4px' }}>
+            {['✦ face + hands tracked', '↑ hold still to sharpen', '⊙ drag cursor to scatter'].map(t => (
+              <span key={t} style={{ fontSize: '10px', color: 'rgba(255,255,255,0.18)', fontFamily: 'monospace', letterSpacing: '0.04em' }}>{t}</span>
             ))}
           </div>
         )}
@@ -519,10 +694,8 @@ export const PlaygroundPage = () => {
       </div>
 
       <style>{`
-        @keyframes blink {
-          from { opacity: 0.4; }
-          to   { opacity: 1; }
-        }
+        @keyframes blink { from { opacity:0.35; } to { opacity:1; } }
+        @keyframes spin  { from { transform:rotate(0deg); } to { transform:rotate(360deg); } }
       `}</style>
     </div>
   );
