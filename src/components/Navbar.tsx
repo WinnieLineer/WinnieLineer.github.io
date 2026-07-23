@@ -32,13 +32,13 @@ export const Navbar = () => {
     <>
       <nav
         className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${
-          scrolled || open ? 'bg-black/60 backdrop-blur-xl border-b border-white/10' : 'bg-transparent'
+          scrolled || open ? 'bg-[#0f0d0c]/75 backdrop-blur-xl border-b border-white/8' : 'bg-transparent'
         }`}
       >
         <div className="max-w-5xl mx-auto px-4 sm:px-6 flex justify-between items-center h-14">
           {/* Brand */}
           <NavLink to="/" className="text-xl font-bold text-white hover:text-violet-300 transition-colors shrink-0">
-            Shi Ting Lin
+            SHIH TING LIN
           </NavLink>
 
           {/* Desktop links */}

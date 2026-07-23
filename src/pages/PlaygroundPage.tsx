@@ -569,7 +569,7 @@ export const PlaygroundPage = () => {
   // ─── Render ────────────────────────────────────────────────────────────────
   return (
     <div style={{
-      minHeight: '100vh', background: '#08070e',
+      minHeight: '100vh', background: '#0b0813',
       display: 'flex', flexDirection: 'column', alignItems: 'center',
       paddingTop: '80px', paddingBottom: '60px', color: 'white', overflow: 'hidden',
     }}>
@@ -597,7 +597,7 @@ export const PlaygroundPage = () => {
         position: 'relative', width: '90vw', maxWidth: '860px',
         aspectRatio: '16/10', borderRadius: '12px', overflow: 'hidden',
         border: cameraOn ? '1px solid rgba(124,58,237,0.38)' : '1px solid rgba(255,255,255,0.05)',
-        background: '#0b0a17',
+        background: '#0c0a14',
         boxShadow: cameraOn
           ? '0 0 80px rgba(124,58,237,0.14), 0 0 180px rgba(56,189,248,0.05)'
           : '0 0 28px rgba(124,58,237,0.06)',

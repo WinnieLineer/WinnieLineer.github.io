@@ -27,7 +27,7 @@ const ReadingProgress = () => {
     }}>
       <div style={{
         height: '100%', width: `${progress}%`,
-        background: 'linear-gradient(90deg, #7c3aed, #a78bfa, #60a5fa)',
+        background: 'linear-gradient(90deg, #7c3aed, #a78bfa, #fb923c, #f59e0b)',
         transition: 'width 0.1s linear',
         boxShadow: '0 0 8px rgba(167,139,250,0.8)',
       }} />
@@ -267,17 +267,33 @@ export const PostDetailPage = () => {
 
         {/* ── Aurora background ── */}
         <div style={{ position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 0 }}>
+          {/* Violet — original */}
           <div style={{
             position: 'absolute', top: '-10%', left: '50%', transform: 'translateX(-50%)',
             width: '80vw', height: '50vh',
             background: 'radial-gradient(ellipse, rgba(109,40,217,0.12) 0%, transparent 70%)',
             filter: 'blur(60px)',
           }} />
+          {/* Blue — original */}
           <div style={{
             position: 'absolute', bottom: '20%', right: '5%',
             width: '40vw', height: '30vh',
             background: 'radial-gradient(ellipse, rgba(96,165,250,0.07) 0%, transparent 70%)',
             filter: 'blur(80px)',
+          }} />
+          {/* Coral — warm accent */}
+          <div style={{
+            position: 'absolute', top: '30%', right: '-5%',
+            width: '35vw', height: '35vh',
+            background: 'radial-gradient(ellipse, rgba(255,107,107,0.07) 0%, transparent 70%)',
+            filter: 'blur(60px)',
+          }} />
+          {/* Amber — warm accent */}
+          <div style={{
+            position: 'absolute', bottom: '5%', left: '5%',
+            width: '30vw', height: '30vh',
+            background: 'radial-gradient(ellipse, rgba(245,158,11,0.06) 0%, transparent 70%)',
+            filter: 'blur(60px)',
           }} />
         </div>
 

@@ -77,7 +77,7 @@ const ParticleField = () => {
     if (!ctx) return;
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
-    const colors = ['#7c3aed', '#0ea5e9', '#10b981', '#f59e0b', '#ec4899'];
+    const colors = ['#7c3aed', '#0ea5e9', '#10b981', '#f59e0b', '#ec4899', '#ff6b6b', '#fb923c'];
     const particles = Array.from({ length: 45 }, () => ({
       x: Math.random() * canvas.width,
       y: Math.random() * canvas.height,
@@ -156,12 +156,15 @@ export const PortfolioPage = () => {
   const side = isLeft ? 'left' : 'right';
 
   return (
-    <div className="relative min-h-screen bg-[#0a0a0a] overflow-hidden">
+    <div className="relative min-h-screen bg-[#0e0b09] overflow-hidden">
       <ParticleField />
 
       {/* Ambient glows */}
       <div className="fixed pointer-events-none" style={{ top: '15%', left: '5%', width: 500, height: 500, background: 'radial-gradient(circle, rgba(124,58,237,0.05) 0%, transparent 70%)', borderRadius: '50%', zIndex: 0 }} />
       <div className="fixed pointer-events-none" style={{ bottom: '10%', right: '5%', width: 600, height: 600, background: 'radial-gradient(circle, rgba(14,165,233,0.04) 0%, transparent 70%)', borderRadius: '50%', zIndex: 0 }} />
+      {/* Warm ambient glow — coral/orange, ties to Spline scene */}
+      <div className="fixed pointer-events-none" style={{ top: '40%', right: '20%', width: 400, height: 400, background: 'radial-gradient(circle, rgba(251,146,60,0.05) 0%, transparent 70%)', borderRadius: '50%', zIndex: 0 }} />
+      <div className="fixed pointer-events-none" style={{ bottom: '30%', left: '15%', width: 350, height: 350, background: 'radial-gradient(circle, rgba(236,72,153,0.04) 0%, transparent 70%)', borderRadius: '50%', zIndex: 0 }} />
 
       {/* Side floating preview */}
       {hoveredProject && (
@@ -372,7 +375,7 @@ export const PortfolioPage = () => {
           className="mt-24 pt-10 flex justify-between items-center text-gray-700 font-mono text-xs uppercase tracking-[0.3em]"
           style={{ borderTop: '1px solid rgba(255,255,255,0.04)' }}
         >
-          <span>© 2026 Shiting Lin</span>
+          <span>© 2026 SHIH TING</span>
           <span className="flex items-center gap-1">
             Built for curiosity
             <span

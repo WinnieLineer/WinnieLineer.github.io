@@ -168,13 +168,44 @@ export const PostsPage = () => {
 
   return (
     <div className="min-h-screen relative">
-      {/* Background radial gradient */}
-      <div
-        className="fixed inset-0 pointer-events-none"
-        style={{
-          background: 'radial-gradient(ellipse 80% 50% at 50% -20%, rgba(109,40,217,0.18) 0%, transparent 70%)',
-        }}
-      />
+      {/* ── Warm blob background — matches Spline scene palette ── */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden" style={{ zIndex: 0 }}>
+        {/* Top-right coral blob */}
+        <div style={{
+          position: 'absolute', top: '-5%', right: '-8%',
+          width: '600px', height: '600px', borderRadius: '50%',
+          background: 'radial-gradient(circle, rgba(255,107,107,0.22) 0%, transparent 65%)',
+          filter: 'blur(50px)',
+        }} />
+        {/* Bottom-left amber blob */}
+        <div style={{
+          position: 'absolute', bottom: '5%', left: '-10%',
+          width: '550px', height: '550px', borderRadius: '50%',
+          background: 'radial-gradient(circle, rgba(245,158,11,0.18) 0%, transparent 65%)',
+          filter: 'blur(50px)',
+        }} />
+        {/* Center violet blob */}
+        <div style={{
+          position: 'absolute', top: '25%', left: '35%',
+          width: '700px', height: '350px', borderRadius: '50%',
+          background: 'radial-gradient(ellipse, rgba(109,40,217,0.15) 0%, transparent 65%)',
+          filter: 'blur(70px)',
+        }} />
+        {/* Mid teal blob */}
+        <div style={{
+          position: 'absolute', top: '55%', right: '10%',
+          width: '380px', height: '380px', borderRadius: '50%',
+          background: 'radial-gradient(circle, rgba(20,184,166,0.12) 0%, transparent 65%)',
+          filter: 'blur(50px)',
+        }} />
+        {/* Pink blob */}
+        <div style={{
+          position: 'absolute', top: '70%', left: '30%',
+          width: '350px', height: '350px', borderRadius: '50%',
+          background: 'radial-gradient(circle, rgba(236,72,153,0.10) 0%, transparent 65%)',
+          filter: 'blur(50px)',
+        }} />
+      </div>
 
       <div className="relative max-w-5xl mx-auto px-6 pt-32 pb-32">
 

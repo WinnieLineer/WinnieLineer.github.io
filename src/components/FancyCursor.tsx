@@ -9,8 +9,8 @@ interface TrailDot {
   color: string;
 }
 
-const TRAIL_LENGTH = 16;
-const TRAIL_COLORS = ['#7c3aed', '#8b5cf6', '#a78bfa', '#c4b5fd', '#0ea5e9', '#38bdf8'];
+const TRAIL_LENGTH = 18;
+const TRAIL_COLORS = ['#ff6b6b', '#fb923c', '#f59e0b', '#ec4899', '#a78bfa', '#34d399', '#38bdf8', '#ff9f7f'];
 
 export const FancyCursor = () => {
   const outerRef = useRef<HTMLDivElement>(null);
@@ -118,17 +118,17 @@ export const FancyCursor = () => {
           width: isHovering ? '50px' : isClicking ? '22px' : '36px',
           height: isHovering ? '50px' : isClicking ? '22px' : '36px',
           borderRadius: '50%',
-          border: `1.5px solid ${isHovering ? '#a78bfa' : 'rgba(167, 139, 250, 0.6)'}`,
+          border: `1.5px solid ${isHovering ? '#fb923c' : 'rgba(255, 150, 80, 0.65)'}`,
           transform: 'translate(-100px, -100px)',
           marginLeft: isHovering ? '-25px' : isClicking ? '-11px' : '-18px',
           marginTop: isHovering ? '-25px' : isClicking ? '-11px' : '-18px',
           zIndex: 9999,
           transition: 'width 0.25s ease, height 0.25s ease, margin 0.25s ease, border-color 0.2s ease, box-shadow 0.2s ease',
           boxShadow: isHovering
-            ? '0 0 18px rgba(167,139,250,0.8), inset 0 0 10px rgba(167,139,250,0.15)'
+            ? '0 0 18px rgba(251,146,60,0.9), inset 0 0 10px rgba(255,107,107,0.15)'
             : isClicking
-            ? '0 0 30px rgba(14,165,233,0.9)'
-            : '0 0 8px rgba(124,58,237,0.5)',
+            ? '0 0 30px rgba(245,158,11,0.9)'
+            : '0 0 8px rgba(255,107,107,0.6)',
           backdropFilter: isHovering ? 'invert(1)' : 'none',
           mixBlendMode: isHovering ? 'difference' : 'normal',
           background: isClicking ? 'rgba(14,165,233,0.15)' : 'transparent',
