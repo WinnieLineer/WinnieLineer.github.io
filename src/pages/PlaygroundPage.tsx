@@ -303,8 +303,12 @@ export const PlaygroundPage = () => {
       }
     }
 
-    // Trail fade
-    ctx.fillStyle = 'rgba(15,7,2,0.22)';
+    // Trail fade — deep warm amber backdrop
+    const grad = ctx.createLinearGradient(0, 0, W, H);
+    grad.addColorStop(0, 'rgba(28, 10, 4, 0.22)');
+    grad.addColorStop(0.5, 'rgba(22, 7, 3, 0.22)');
+    grad.addColorStop(1, 'rgba(32, 10, 5, 0.22)');
+    ctx.fillStyle = grad;
     ctx.fillRect(0, 0, W, H);
 
     const dragMult = mouseRef.current.down ? DRAG_MULT : 1;
@@ -596,14 +600,28 @@ export const PlaygroundPage = () => {
       <div style={{
         position: 'relative', width: '90vw', maxWidth: '860px',
         aspectRatio: '16/10', borderRadius: '12px', overflow: 'hidden',
-        border: cameraOn ? '1px solid rgba(211,119,53,0.38)' : '1px solid rgba(255,255,255,0.05)',
-        background: 'linear-gradient(135deg, #4c2d21, #70442b)',
+        border: cameraOn
+          ? '1px solid rgba(211,130,60,0.40)'
+          : '1px solid rgba(160,80,30,0.22)',
+        background: 'linear-gradient(135deg, #1a0803 0%, #2d0f05 35%, #1f0904 65%, #260a03 100%)',
         boxShadow: cameraOn
-          ? '0 18px 48px rgba(230,93,73,0.25), 0 0 80px rgba(255,181,27,0.14)'
-          : '0 14px 36px rgba(126,70,34,0.2)',
+          ? '0 18px 48px rgba(200,80,30,0.22), 0 0 80px rgba(255,160,40,0.10), inset 0 0 60px rgba(100,30,10,0.20)'
+          : '0 14px 36px rgba(80,25,8,0.40), inset 0 0 40px rgba(60,15,5,0.18)',
         transition: 'box-shadow 0.8s ease, border-color 0.8s ease',
         zIndex: 1, cursor: 'crosshair',
       }}>
+        {/* Ambient color blobs — behind particles */}
+        <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 0 }}>
+          <div style={{ position: 'absolute', width: '45%', height: '55%', top: '-10%', left: '-8%',
+            background: 'radial-gradient(ellipse, rgba(200,80,20,0.22) 0%, transparent 70%)', borderRadius: '50%' }} />
+          <div style={{ position: 'absolute', width: '35%', height: '45%', bottom: '-5%', right: '-5%',
+            background: 'radial-gradient(ellipse, rgba(160,40,10,0.18) 0%, transparent 70%)', borderRadius: '50%' }} />
+          <div style={{ position: 'absolute', width: '30%', height: '40%', top: '10%', right: '10%',
+            background: 'radial-gradient(ellipse, rgba(220,100,30,0.12) 0%, transparent 70%)', borderRadius: '50%' }} />
+          <div style={{ position: 'absolute', width: '25%', height: '35%', bottom: '10%', left: '15%',
+            background: 'radial-gradient(ellipse, rgba(180,60,20,0.10) 0%, transparent 70%)', borderRadius: '50%' }} />
+        </div>
+
         {/* HUD Indicator (top-left) */}
         {cameraOn && (
           <div style={{
@@ -701,10 +719,10 @@ export const PlaygroundPage = () => {
             position: 'absolute', width: 16, height: 16,
             ...(p[0]==='t' ? { top: 10 } : { bottom: 10 }),
             ...(p[1]==='l' ? { left: 10 } : { right: 10 }),
-            borderTop:    p[0]==='t' ? '1px solid rgba(211,119,53,0.3)' : 'none',
-            borderBottom: p[0]==='b' ? '1px solid rgba(211,119,53,0.3)' : 'none',
-            borderLeft:   p[1]==='l' ? '1px solid rgba(211,119,53,0.3)' : 'none',
-            borderRight:  p[1]==='r' ? '1px solid rgba(211,119,53,0.3)' : 'none',
+            borderTop:    p[0]==='t' ? '1px solid rgba(211,120,50,0.30)' : 'none',
+            borderBottom: p[0]==='b' ? '1px solid rgba(211,120,50,0.30)' : 'none',
+            borderLeft:   p[1]==='l' ? '1px solid rgba(211,120,50,0.30)' : 'none',
+            borderRight:  p[1]==='r' ? '1px solid rgba(211,120,50,0.30)' : 'none',
           }} />
         ))}
 
@@ -712,8 +730,9 @@ export const PlaygroundPage = () => {
         {!cameraOn && (
           <div style={{
             position: 'absolute', bottom: 14, left: '50%', transform: 'translateX(-50%)',
-            fontSize: '9px', fontFamily: 'monospace', color: 'rgba(255,255,255,0.15)',
-            letterSpacing: '0.1em', pointerEvents: 'none',
+            fontSize: '9px', fontFamily: 'monospace',
+            color: 'rgba(255,180,80,0.30)',
+            letterSpacing: '0.12em', pointerEvents: 'none',
           }}>
             ✦ move cursor · click + drag to pull
           </div>

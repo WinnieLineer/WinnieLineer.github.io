@@ -10,7 +10,11 @@ interface TrailDot {
 }
 
 const TRAIL_LENGTH = 18;
-const TRAIL_COLORS = ['#ff6b6b', '#fb923c', '#f59e0b', '#ff7b54', '#ffd166', '#e65d49', '#ffb347', '#ff9f7f'];
+const TRAIL_COLORS = [
+  '#ff6b6b', '#fb923c', '#f59e0b', '#ff7b54',
+  '#ffd166', '#e65d49', '#ffb347', '#ff9f7f',
+  '#e07a3a', '#ffb51b', '#d35346', '#f97316',
+];
 
 export const FancyCursor = () => {
   const outerRef = useRef<HTMLDivElement>(null);
@@ -129,8 +133,8 @@ export const FancyCursor = () => {
             : isClicking
             ? '0 0 30px rgba(245,158,11,0.9)'
             : '0 0 8px rgba(255,107,107,0.6)',
-          backdropFilter: isHovering ? 'invert(1)' : 'none',
-          mixBlendMode: isHovering ? 'difference' : 'normal',
+          backdropFilter: 'none',
+          mixBlendMode: 'normal',
           background: isClicking ? 'rgba(230,125,58,0.15)' : 'transparent',
         }}
       >
