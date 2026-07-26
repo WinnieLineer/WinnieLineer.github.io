@@ -10,7 +10,7 @@ interface TrailDot {
 }
 
 const TRAIL_LENGTH = 18;
-const TRAIL_COLORS = ['#ff6b6b', '#fb923c', '#f59e0b', '#ec4899', '#a78bfa', '#34d399', '#38bdf8', '#ff9f7f'];
+const TRAIL_COLORS = ['#ff6b6b', '#fb923c', '#f59e0b', '#ff7b54', '#ffd166', '#e65d49', '#ffb347', '#ff9f7f'];
 
 export const FancyCursor = () => {
   const outerRef = useRef<HTMLDivElement>(null);
@@ -131,7 +131,7 @@ export const FancyCursor = () => {
             : '0 0 8px rgba(255,107,107,0.6)',
           backdropFilter: isHovering ? 'invert(1)' : 'none',
           mixBlendMode: isHovering ? 'difference' : 'normal',
-          background: isClicking ? 'rgba(14,165,233,0.15)' : 'transparent',
+          background: isClicking ? 'rgba(230,125,58,0.15)' : 'transparent',
         }}
       >
         {/* Inner ring decoration */}
@@ -141,7 +141,7 @@ export const FancyCursor = () => {
               position: 'absolute',
               inset: '4px',
               borderRadius: '50%',
-              border: '1px solid rgba(167,139,250,0.4)',
+              border: '1px solid rgba(230,125,58,0.45)',
               animation: 'spin-slow 3s linear infinite',
             }}
           />
@@ -158,14 +158,14 @@ export const FancyCursor = () => {
           width: isClicking ? '10px' : '6px',
           height: isClicking ? '10px' : '6px',
           borderRadius: '50%',
-          background: isHovering ? '#a78bfa' : '#ffffff',
+          background: isHovering ? '#e07a3a' : 'rgba(255,240,220,0.9)',
           marginLeft: isClicking ? '-5px' : '-3px',
           marginTop: isClicking ? '-5px' : '-3px',
           zIndex: 10000,
           transition: 'width 0.1s, height 0.1s, margin 0.1s, background 0.2s',
           boxShadow: isHovering
-            ? '0 0 8px #a78bfa, 0 0 16px #7c3aed'
-            : '0 0 6px rgba(255,255,255,0.8)',
+            ? '0 0 8px #e07a3a, 0 0 16px #d35346'
+            : '0 0 6px rgba(255,200,150,0.8)',
         }}
       />
 
@@ -179,7 +179,7 @@ export const FancyCursor = () => {
             width: '60px',
             height: '60px',
             borderRadius: '50%',
-            border: '2px solid rgba(14,165,233,0.6)',
+            border: '2px solid rgba(230,125,58,0.6)',
             marginLeft: '-30px',
             marginTop: '-30px',
             zIndex: 9997,

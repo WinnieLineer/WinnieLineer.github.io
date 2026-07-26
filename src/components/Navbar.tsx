@@ -5,6 +5,7 @@ export const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
   const location = useLocation();
+  const isHome = location.pathname === '/';
 
   // Close menu on route change
   useEffect(() => { setOpen(false); }, [location]);
@@ -16,7 +17,7 @@ export const Navbar = () => {
   }, []);
 
   const linkClass = ({ isActive }: { isActive: boolean }) =>
-    `text-base transition-colors duration-300 hover:text-white ${isActive ? 'text-white font-semibold' : 'text-gray-400'}`;
+    `text-base transition-colors duration-300 hover:text-[#ff5f7f] ${isActive ? (isHome ? 'text-white font-semibold' : 'text-[#7a3d22] font-semibold') : (isHome ? 'text-gray-400' : 'text-[#8b735f]')}`;
 
   const mobileLinkClass = ({ isActive }: { isActive: boolean }) =>
     `block text-2xl font-bold transition-colors duration-200 py-3 border-b border-white/8 hover:text-violet-300 ${isActive ? 'text-white' : 'text-gray-400'}`;
@@ -32,12 +33,12 @@ export const Navbar = () => {
     <>
       <nav
         className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${
-          scrolled || open ? 'bg-[#0f0d0c]/75 backdrop-blur-xl border-b border-white/8' : 'bg-transparent'
+          scrolled || open || !isHome ? 'bg-[#ffe7d5]/80 backdrop-blur-xl border-b border-[#b66a3b]/15 shadow-[0_6px_24px_rgba(126,70,34,0.08)]' : 'bg-transparent'
         }`}
       >
         <div className="max-w-5xl mx-auto px-4 sm:px-6 flex justify-between items-center h-14">
           {/* Brand */}
-          <NavLink to="/" className="text-xl font-bold text-white hover:text-violet-300 transition-colors shrink-0">
+          <NavLink to="/" className={`text-xl font-bold transition-colors shrink-0 ${isHome ? 'text-white hover:text-[#fff1dd]' : 'text-[#6d351d] hover:text-[#ff5f7f]'}`}>
             SHIH TING LIN
           </NavLink>
 

@@ -4,21 +4,21 @@
 
 @layer base {
   body {
-    /* Warm dark background — ties to the Spline scene's peach/warm palette */
-    @apply bg-[#0f0d0c] text-gray-200 antialiased;
+    /* Match Spline scene warm peach background */
+    @apply bg-[#F9D3B7] text-stone-900 antialiased;
   }
   ::-webkit-scrollbar { width: 8px; }
-  ::-webkit-scrollbar-track { background: #0f0d0c; }
-  ::-webkit-scrollbar-thumb { background: rgba(255, 200, 160, 0.2); border-radius: 4px; }
-  ::-webkit-scrollbar-thumb:hover { background: rgba(255, 200, 160, 0.4); }
+  ::-webkit-scrollbar-track { background: #F9D3B7; }
+  ::-webkit-scrollbar-thumb { background: rgba(139, 69, 30, 0.25); border-radius: 4px; }
+  ::-webkit-scrollbar-thumb:hover { background: rgba(139, 69, 30, 0.45); }
 }
 
 @layer components {
   /* --- Glitch Text Effect --- */
   .glitch { @apply relative inline-block; animation: glitch-skew 1s infinite linear alternate-reverse; }
-  .glitch::before, .glitch::after { content: attr(data-text); @apply absolute top-0 left-0 w-full h-full bg-[#0f0d0c] opacity-80; clip: rect(0, 0, 0, 0); }
-  .glitch::before { left: -2px; text-shadow: 1px 0 #ff00c1; animation: glitch-anim-1 2s infinite linear alternate-reverse; }
-  .glitch::after { left: 2px; text-shadow: -1px 0 #00fff9; animation: glitch-anim-2 3s infinite linear alternate-reverse; }
+  .glitch::before, .glitch::after { content: attr(data-text); position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #F9D3B7; opacity: 0.8; clip: rect(0, 0, 0, 0); }
+  .glitch::before { left: -2px; text-shadow: 1px 0 #e65d49; animation: glitch-anim-1 2s infinite linear alternate-reverse; }
+  .glitch::after { left: 2px; text-shadow: -1px 0 #ffb51b; animation: glitch-anim-2 3s infinite linear alternate-reverse; }
 
   /* --- Scroll Down Indicator --- */
   .scroll-down-indicator {
@@ -59,7 +59,7 @@
   /* --- Portfolio Main Title --- */
   .portfolio-main-title {
     @apply text-7xl md:text-9xl font-black uppercase tracking-tighter;
-    background: linear-gradient(135deg, #ffffff 0%, rgba(255,255,255,0.5) 50%, #7c3aed 100%);
+    background: linear-gradient(135deg, #3d1f10 0%, rgba(80,40,20,0.7) 40%, #d35346 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -71,7 +71,7 @@
   /* --- Project List V2 --- */
   .project-list-item-v2 {
     @apply relative overflow-hidden cursor-none;
-    border-bottom: 1px solid rgba(255,255,255,0.06);
+    border-bottom: 1px solid rgba(0,0,0,0.08);
   }
 
   /* Hover sweep glow */
@@ -151,6 +151,44 @@
   .experience-card {
     @apply pl-8 md:pl-0;
   }
+
+  /* --- Shared toyland surface for non-home pages --- */
+  .toyland-page {
+    position: relative;
+    isolation: isolate;
+    min-height: 100vh;
+    background:
+      radial-gradient(circle at 8% 18%, rgba(255, 107, 107, 0.26) 0 52px, transparent 53px),
+      radial-gradient(circle at 91% 22%, rgba(56, 189, 248, 0.23) 0 68px, transparent 69px),
+      radial-gradient(circle at 78% 83%, rgba(132, 204, 22, 0.18) 0 80px, transparent 81px),
+      linear-gradient(140deg, #ffe7d5 0%, #ffd5b6 48%, #ffe6bf 100%);
+  }
+  .toyland-page::before,
+  .toyland-page::after {
+    content: '';
+    position: fixed;
+    pointer-events: none;
+    z-index: -1;
+    border-radius: 999px;
+    filter: blur(1px);
+  }
+  .toyland-page::before {
+    width: 220px;
+    height: 72px;
+    left: -42px;
+    bottom: 10%;
+    background: #ffb51b;
+    box-shadow: 0 14px 0 rgba(221, 119, 15, 0.18);
+    transform: rotate(-10deg);
+  }
+  .toyland-page::after {
+    width: 150px;
+    height: 150px;
+    right: -34px;
+    top: 28%;
+    background: rgba(244, 114, 182, 0.38);
+    box-shadow: inset 0 -12px 0 rgba(219, 39, 119, 0.12);
+  }
 }
 
 /* --- Keyframes --- */
@@ -170,4 +208,3 @@
 @keyframes aurora-drift-1 { 0% { transform: translate(0, 0) scale(1); } 100% { transform: translate(5%, 8%) scale(1.12); } }
 @keyframes aurora-drift-2 { 0% { transform: translate(0, 0) scale(1); } 100% { transform: translate(-6%, -5%) scale(1.08); } }
 @keyframes shimmer-line { 0%, 100% { opacity: 0.6; } 50% { opacity: 1; } }
-

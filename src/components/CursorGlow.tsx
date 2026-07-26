@@ -29,7 +29,7 @@ export const CursorGlow = () => {
         left: '-200px',
         width: '400px',
         height: '400px',
-        background: 'radial-gradient(circle, rgba(138, 43, 226, 0.15), transparent 80%)',
+        background: 'radial-gradient(circle, rgba(211, 119, 53, 0.12), transparent 80%)',
         borderRadius: '50%',
         pointerEvents: 'none', // Make sure it doesn't block clicks
         zIndex: -1, // Stay behind all content

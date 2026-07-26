@@ -138,19 +138,19 @@ const CameraButton = ({ loading, modelReady, onClick }: {
       onMouseLeave={() => setHovered(false)}
       style={{
         position: 'relative', width: 80, height: 80, borderRadius: '50%',
-        border: `1px solid ${hovered && !busy ? 'rgba(255,255,255,0.55)' : 'rgba(255,255,255,0.16)'}`,
-        background: hovered && !busy ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.03)',
+        border: `1px solid ${hovered && !busy ? 'rgba(230,93,73,0.55)' : 'rgba(126,70,34,0.2)'}`,
+        background: hovered && !busy ? '#ffe4c6' : '#fff6df',
         cursor: busy ? 'wait' : 'pointer',
         display: 'flex', flexDirection: 'column', alignItems: 'center',
         justifyContent: 'center', gap: 6,
         transition: 'all 0.3s ease', backdropFilter: 'blur(12px)',
-        boxShadow: hovered && !busy ? '0 0 0 1px rgba(255,255,255,0.07), 0 8px 32px rgba(0,0,0,0.4)' : 'none',
+        boxShadow: hovered && !busy ? '0 0 0 1px rgba(255,138,76,0.2), 0 8px 24px rgba(126,70,34,0.16)' : '0 6px 16px rgba(126,70,34,0.1)',
         opacity: busy ? 0.45 : 1,
       }}
     >
       <div style={{
         position: 'absolute', inset: -5, borderRadius: '50%',
-        border: '1px solid rgba(255,255,255,0.13)',
+        border: '1px solid rgba(230,93,73,0.25)',
         transform: hovered && !busy ? 'scale(1)' : 'scale(0.88)',
         opacity: hovered && !busy ? 1 : 0,
         transition: 'all 0.35s ease',
@@ -162,7 +162,7 @@ const CameraButton = ({ loading, modelReady, onClick }: {
         </svg>
       ) : (
         <svg width="26" height="21" viewBox="0 0 26 21" fill="none"
-          style={{ color: hovered ? 'rgba(255,255,255,0.88)' : 'rgba(255,255,255,0.4)', transition: 'color 0.3s' }}>
+          style={{ color: hovered ? '#e65d49' : '#8b5a40', transition: 'color 0.3s' }}>
           <rect x="1" y="5.5" width="24" height="14" rx="2.5" stroke="currentColor" strokeWidth="1.3"/>
           <circle cx="13" cy="12.5" r="4" stroke="currentColor" strokeWidth="1.3"/>
           <circle cx="13" cy="12.5" r="1.6" stroke="currentColor" strokeWidth="1"/>
@@ -173,7 +173,7 @@ const CameraButton = ({ loading, modelReady, onClick }: {
       <span style={{
         fontSize: '8px', fontFamily: 'monospace', letterSpacing: '0.12em',
         textTransform: 'uppercase', lineHeight: 1,
-        color: hovered && !busy ? 'rgba(255,255,255,0.65)' : 'rgba(255,255,255,0.22)',
+        color: hovered && !busy ? '#b45309' : '#8b5a40',
         transition: 'color 0.3s',
       }}>
         {loading ? 'loading' : !modelReady ? 'init…' : 'camera'}
@@ -228,7 +228,7 @@ export const PlaygroundPage = () => {
         vx: 0, vy: 0,
         size:    Math.random() * 1.4 + 0.5,
         alpha:   Math.random() * 0.35 + 0.55,
-        baseHue: 210 + Math.random() * 130,
+        baseHue: 8 + Math.random() * 45,
       };
     });
   }, []);
@@ -304,7 +304,7 @@ export const PlaygroundPage = () => {
     }
 
     // Trail fade
-    ctx.fillStyle = 'rgba(8,7,14,0.22)';
+    ctx.fillStyle = 'rgba(15,7,2,0.22)';
     ctx.fillRect(0, 0, W, H);
 
     const dragMult = mouseRef.current.down ? DRAG_MULT : 1;
@@ -568,24 +568,24 @@ export const PlaygroundPage = () => {
 
   // ─── Render ────────────────────────────────────────────────────────────────
   return (
-    <div style={{
-      minHeight: '100vh', background: '#0b0813',
+    <div className="toyland-page" style={{
+      minHeight: '100vh',
       display: 'flex', flexDirection: 'column', alignItems: 'center',
-      paddingTop: '80px', paddingBottom: '60px', color: 'white', overflow: 'hidden',
+      paddingTop: '80px', paddingBottom: '60px', color: '#62331d', overflow: 'hidden',
     }}>
       {/* Header */}
       <div style={{ textAlign: 'center', marginBottom: '28px', zIndex: 2 }}>
-        <p style={{ fontFamily: 'monospace', fontSize: '10px', letterSpacing: '0.45em', color: 'rgba(124,58,237,0.6)', textTransform: 'uppercase', marginBottom: '10px' }}>
+        <p style={{ fontFamily: 'monospace', fontSize: '10px', letterSpacing: '0.45em', color: 'rgba(211,119,53,0.7)', textTransform: 'uppercase', marginBottom: '10px' }}>
           ◈ Playground
         </p>
         <h1 style={{
           fontSize: 'clamp(1.8rem, 4.5vw, 3.4rem)', fontWeight: 900, letterSpacing: '-0.04em',
-          background: 'linear-gradient(135deg, #fff 0%, #a78bfa 55%, #38bdf8 100%)',
+          background: 'linear-gradient(135deg, #3d1f10 0%, #e07a3a 55%, #ffb51b 100%)',
           WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', marginBottom: '8px',
         }}>
           Particle Mirror
         </h1>
-        <p style={{ fontSize: '13px', color: 'rgba(255,255,255,0.28)', maxWidth: '360px', lineHeight: 1.65 }}>
+        <p style={{ fontSize: '13px', color: '#795943', maxWidth: '360px', lineHeight: 1.65 }}>
           {cameraOn
             ? 'Face & hands tracked as particles. Drag to scatter.'
             : 'Move your cursor through the particles — grant camera to see yourself.'}
@@ -596,11 +596,11 @@ export const PlaygroundPage = () => {
       <div style={{
         position: 'relative', width: '90vw', maxWidth: '860px',
         aspectRatio: '16/10', borderRadius: '12px', overflow: 'hidden',
-        border: cameraOn ? '1px solid rgba(124,58,237,0.38)' : '1px solid rgba(255,255,255,0.05)',
-        background: '#0c0a14',
+        border: cameraOn ? '1px solid rgba(211,119,53,0.38)' : '1px solid rgba(255,255,255,0.05)',
+        background: 'linear-gradient(135deg, #4c2d21, #70442b)',
         boxShadow: cameraOn
-          ? '0 0 80px rgba(124,58,237,0.14), 0 0 180px rgba(56,189,248,0.05)'
-          : '0 0 28px rgba(124,58,237,0.06)',
+          ? '0 18px 48px rgba(230,93,73,0.25), 0 0 80px rgba(255,181,27,0.14)'
+          : '0 14px 36px rgba(126,70,34,0.2)',
         transition: 'box-shadow 0.8s ease, border-color 0.8s ease',
         zIndex: 1, cursor: 'crosshair',
       }}>
@@ -614,13 +614,13 @@ export const PlaygroundPage = () => {
             <div style={{
               display: 'flex', alignItems: 'center', gap: 10,
               padding: '8px 14px', borderRadius: '6px',
-              background: 'rgba(124,58,237,0.08)', backdropFilter: 'blur(8px)',
-              border: '1px solid rgba(124,58,237,0.22)',
+              background: 'rgba(211,119,53,0.08)', backdropFilter: 'blur(8px)',
+              border: '1px solid rgba(211,119,53,0.22)',
               boxShadow: '0 4px 16px rgba(0,0,0,0.3)',
             }}>
               <div style={{
                 width: 5, height: 5, borderRadius: '50%',
-                background: '#a78bfa', boxShadow: '0 0 8px #a78bfa',
+                background: '#e07a3a', boxShadow: '0 0 8px #e07a3a',
                 animation: 'pulse 2s infinite'
               }} />
               <span style={{
@@ -685,12 +685,12 @@ export const PlaygroundPage = () => {
           opacity: cameraOn ? 1 : 0,
           transform: cameraOn ? 'translateY(0) scale(1)' : 'translateY(6px) scale(0.9)',
           transition: 'opacity 0.45s ease, transform 0.45s ease',
-          background: '#000', zIndex: 3,
+          background: '#1a0a02', zIndex: 3,
         }}>
           <video ref={pipVideoRef} muted autoPlay playsInline
             style={{ width: '100%', height: '100%', objectFit: 'cover', transform: 'scaleX(-1)' }}
           />
-          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(135deg, rgba(124,58,237,0.1), transparent)', pointerEvents: 'none' }} />
+          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(135deg, rgba(211,119,53,0.1), transparent)', pointerEvents: 'none' }} />
           <div style={{ position: 'absolute', top: 6, left: 8, fontSize: '8px', fontFamily: 'monospace', color: 'rgba(255,255,255,0.35)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>live</div>
           <div style={{ position: 'absolute', top: 8, right: 8, width: 5, height: 5, borderRadius: '50%', background: '#ef4444', boxShadow: '0 0 5px #ef4444', animation: 'blink 1.2s ease-in-out infinite alternate' }} />
         </div>
@@ -701,10 +701,10 @@ export const PlaygroundPage = () => {
             position: 'absolute', width: 16, height: 16,
             ...(p[0]==='t' ? { top: 10 } : { bottom: 10 }),
             ...(p[1]==='l' ? { left: 10 } : { right: 10 }),
-            borderTop:    p[0]==='t' ? '1px solid rgba(124,58,237,0.3)' : 'none',
-            borderBottom: p[0]==='b' ? '1px solid rgba(124,58,237,0.3)' : 'none',
-            borderLeft:   p[1]==='l' ? '1px solid rgba(124,58,237,0.3)' : 'none',
-            borderRight:  p[1]==='r' ? '1px solid rgba(124,58,237,0.3)' : 'none',
+            borderTop:    p[0]==='t' ? '1px solid rgba(211,119,53,0.3)' : 'none',
+            borderBottom: p[0]==='b' ? '1px solid rgba(211,119,53,0.3)' : 'none',
+            borderLeft:   p[1]==='l' ? '1px solid rgba(211,119,53,0.3)' : 'none',
+            borderRight:  p[1]==='r' ? '1px solid rgba(211,119,53,0.3)' : 'none',
           }} />
         ))}
 

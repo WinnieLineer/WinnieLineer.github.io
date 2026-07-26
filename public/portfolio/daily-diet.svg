@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" role="img" aria-labelledby="title desc">
+  <title id="title">Daily Diet preview</title>
+  <desc id="desc">Fresh ingredients arranged on a meal plate.</desc>
+  <defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#f7fee7"/><stop offset="1" stop-color="#d9f99d"/></linearGradient><filter id="shadow"><feDropShadow dx="0" dy="12" stdDeviation="12" flood-color="#365314" flood-opacity=".18"/></filter></defs>
+  <rect width="800" height="500" rx="40" fill="url(#bg)"/>
+  <g filter="url(#shadow)"><circle cx="400" cy="275" r="150" fill="#fff"/><circle cx="400" cy="275" r="118" fill="#f1f5c8"/><circle cx="350" cy="242" r="34" fill="#fb7185"/><circle cx="456" cy="230" r="35" fill="#facc15"/><circle cx="442" cy="322" r="39" fill="#84cc16"/><circle cx="337" cy="335" r="31" fill="#fb923c"/><path d="M400 252c18-58 75-61 64-12-10 44-64 63-64 63s-54-19-64-63c-11-49 46-46 64 12z" fill="#4d7c0f"/></g>
+  <text x="400" y="83" text-anchor="middle" fill="#3f6212" font-family="system-ui, sans-serif" font-size="38" font-weight="700">Daily Diet</text>
+</svg>

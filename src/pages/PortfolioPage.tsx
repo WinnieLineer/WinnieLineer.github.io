@@ -3,6 +3,15 @@ import { SidePreview } from '../components/SidePreview';
 
 const projects = [
   {
+    title: 'Daily Diet',
+    description: 'A daily nutrition companion designed to make meal logging and healthier choices feel simple and approachable.',
+    image: '/portfolio/daily-diet.svg',
+    url: 'https://winnie-lin.space/daily-diet/',
+    tags: ['Health', 'Nutrition', 'Lifestyle'],
+    year: '2026',
+    color: '#84a947',
+  },
+  {
     title: 'Asset Insights',
     description: 'An advanced asset tracking dashboard with automatic classification, real-time stock prices, and historical bar charts.',
     image: '/portfolio/asset-insights.png',
@@ -10,6 +19,15 @@ const projects = [
     tags: ['Finance', 'AI', 'Real-time'],
     year: '2026',
     color: '#7c3aed',
+  },
+  {
+    title: 'HeartSync',
+    description: 'A shared-life balance app for couples to track expenses and household contributions in one thoughtful view.',
+    image: '/portfolio/heartsync.svg',
+    url: 'https://winnie-lin.space/couple-balance/',
+    tags: ['Couples', 'Finance', 'Wellbeing'],
+    year: '2026',
+    color: '#e879a8',
   },
   {
     title: 'Dawnguard',
@@ -64,6 +82,15 @@ const projects = [
     tags: ['Health', 'OCR', 'AI'],
     year: '2024',
     color: '#ec4899',
+  },
+  {
+    title: 'Clock for Phone',
+    description: 'A phone-first clock experience that turns time into a calm, focused part of the day.',
+    image: '/portfolio/clock-for-phone.svg',
+    url: 'https://winnie-lin.space/clockForPhone/',
+    tags: ['Mobile', 'Utility', 'Time'],
+    year: '2026',
+    color: '#5b7cfa',
   },
 ];
 
@@ -156,7 +183,7 @@ export const PortfolioPage = () => {
   const side = isLeft ? 'left' : 'right';
 
   return (
-    <div className="relative min-h-screen bg-[#0e0b09] overflow-hidden">
+    <div className="toyland-page relative overflow-hidden">
       <ParticleField />
 
       {/* Ambient glows */}
@@ -190,22 +217,22 @@ export const PortfolioPage = () => {
             marginBottom: '64px',
           }}
         >
-          <div className="text-xs font-mono text-violet-400/60 uppercase tracking-[0.4em] mb-3">
+          <div className="text-xs font-mono uppercase tracking-[0.4em] mb-3" style={{ color: 'rgba(211,119,53,0.75)' }}>
             ◈ Attempts
           </div>
           <div className="flex justify-between items-baseline">
             <h1 className="portfolio-main-title">Experiments</h1>
-            <div className="text-right">
-              <div className="text-gray-500 font-mono text-sm">2024–2026</div>
-              <div className="text-[10px] text-gray-700 font-mono mt-1 tracking-widest uppercase">
-                things i built for fun
+              <div className="text-right">
+                <div className="font-mono text-sm" style={{ color: '#6b4530' }}>2024–2026</div>
+                <div className="font-mono mt-1 tracking-widest uppercase" style={{ fontSize: '10px', color: '#9b6b4a' }}>
+                  things i built for fun
+                </div>
               </div>
-            </div>
           </div>
         </div>
 
         {/* Divider */}
-        <div className="w-full h-px mb-0 relative" style={{ background: 'linear-gradient(90deg, transparent, rgba(124,58,237,0.4), rgba(14,165,233,0.3), transparent)' }} />
+        <div className="w-full h-px mb-0 relative" style={{ background: 'linear-gradient(90deg, transparent, rgba(211,119,53,0.45), rgba(230,93,73,0.25), transparent)' }} />
 
         {/* Project list */}
         <div className="relative">
@@ -228,8 +255,7 @@ export const PortfolioPage = () => {
               <div
                 className="flex items-center justify-between py-5 relative"
                 style={{
-                  borderBottom: `1px solid ${hoveredIndex === index ? `${project.color}33` : 'rgba(255,255,255,0.05)'}`,
-                  transition: 'border-color 0.3s ease',
+                  borderBottom: `1px solid ${hoveredIndex === index ? `${project.color}44` : 'rgba(0,0,0,0.10)'}`,                  transition: 'border-color 0.3s ease',
                 }}
               >
                 {/* Left: number + title + tags */}
@@ -239,7 +265,7 @@ export const PortfolioPage = () => {
                     className="text-xs font-mono shrink-0 tabular-nums transition-all duration-300 hidden sm:inline"
                     style={{
                       color: hoveredIndex === index ? project.color : 'transparent',
-                      WebkitTextStroke: hoveredIndex === index ? '0px' : '1px rgba(255,255,255,0.12)',
+                      WebkitTextStroke: hoveredIndex === index ? '0px' : '1px rgba(0,0,0,0.25)',
                       textShadow: hoveredIndex === index ? `0 0 8px ${project.color}` : 'none',
                       width: '28px',
                     }}
@@ -254,12 +280,12 @@ export const PortfolioPage = () => {
                       style={{
                         fontSize: 'clamp(1.8rem, 4vw, 3.5rem)',
                         background: hoveredIndex === index
-                          ? `linear-gradient(135deg, #ffffff 0%, ${project.color} 100%)`
-                          : `linear-gradient(135deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.06) 100%)`,
+                          ? `linear-gradient(135deg, #3d1f10 0%, ${project.color} 100%)`
+                          : `linear-gradient(135deg, rgba(0,0,0,0.08) 0%, rgba(0,0,0,0.04) 100%)`,
                         WebkitBackgroundClip: 'text',
                         WebkitTextFillColor: 'transparent',
                         backgroundClip: 'text',
-                        WebkitTextStroke: hoveredIndex === index ? '0px' : '1px rgba(255,255,255,0.14)',
+                        WebkitTextStroke: hoveredIndex === index ? '0px' : '1px rgba(0,0,0,0.18)',
                         filter: hoveredIndex === index ? `drop-shadow(0 0 18px ${project.color}55)` : 'none',
                         transition: 'all 0.35s ease',
                         display: 'block',
@@ -272,7 +298,7 @@ export const PortfolioPage = () => {
                     <p
                       className="text-xs leading-relaxed mt-1 max-w-sm transition-all duration-300"
                       style={{
-                        color: hoveredIndex === index ? 'rgba(255,255,255,0.5)' : 'transparent',
+                        color: hoveredIndex === index ? 'rgba(0,0,0,0.75)' : 'transparent',
                         maxHeight: hoveredIndex === index ? '60px' : '0px',
                         overflow: 'hidden',
                         transition: 'color 0.3s ease, max-height 0.4s ease',
@@ -313,7 +339,7 @@ export const PortfolioPage = () => {
                   <span
                     className="text-base font-light font-mono transition-all duration-300 hidden sm:block"
                     style={{
-                      color: hoveredIndex === index ? project.color : 'rgba(255,255,255,0.15)',
+                      color: hoveredIndex === index ? project.color : 'rgba(0,0,0,0.3)',
                       textShadow: hoveredIndex === index ? `0 0 12px ${project.color}` : 'none',
                       minWidth: '44px',
                       textAlign: 'right',
@@ -339,7 +365,7 @@ export const PortfolioPage = () => {
                       alt={project.title}
                       className="w-full h-full object-cover transition-all duration-500"
                       style={{
-                        filter: hoveredIndex === index ? 'none' : 'grayscale(60%) brightness(0.5)',
+                        filter: hoveredIndex === index ? 'none' : 'grayscale(30%) brightness(0.88)',
                       }}
                     />
                     {/* Color overlay on hover */}
@@ -373,13 +399,13 @@ export const PortfolioPage = () => {
         {/* Footer */}
         <div
           className="mt-24 pt-10 flex justify-between items-center text-gray-700 font-mono text-xs uppercase tracking-[0.3em]"
-          style={{ borderTop: '1px solid rgba(255,255,255,0.04)' }}
+          style={{ borderTop: '1px solid rgba(0,0,0,0.10)' }}
         >
           <span>© 2026 SHIH TING</span>
-          <span className="flex items-center gap-1">
+          <span className="flex items-center gap-1" style={{ color: '#8b5a40' }}>
             Built for curiosity
             <span
-              className="inline-block w-[2px] h-[13px] bg-violet-400 ml-1"
+              className="inline-block w-[2px] h-[13px] bg-violet-500 ml-1"
               style={{ opacity: cursorBlink ? 1 : 0, transition: 'opacity 0.1s' }}
             />
           </span>

@@ -5,13 +5,13 @@ import { getPosts, Post } from '../lib/api';
 
 // ─── Shimmer Skeleton ────────────────────────────────────────────────────────
 const Skeleton = () => (
-  <div className="animate-pulse space-y-6">
+    <div className="animate-pulse space-y-6">
     {/* Hero skeleton */}
-    <div className="h-64 rounded-3xl bg-white/5" />
+    <div className="h-64 rounded-3xl bg-white/50" />
     {/* Grid skeleton */}
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
       {[...Array(4)].map((_, i) => (
-        <div key={i} className="h-52 rounded-2xl bg-white/5" />
+        <div key={i} className="h-52 rounded-2xl bg-white/50" />
       ))}
     </div>
   </div>
@@ -45,18 +45,18 @@ const FeaturedCard = ({ post, index }: { post: Post; index: number }) => {
       }}
     >
       <Link to={`/posts/${post.slug}`} className="group block">
-        <div className="relative rounded-3xl overflow-hidden border border-white/10 bg-black/30 backdrop-blur-sm p-8 md:p-12 transition-all duration-500 hover:border-violet-500/40 hover:shadow-[0_0_40px_rgba(139,92,246,0.15)] hover:-translate-y-1">
+        <div className="relative rounded-3xl overflow-hidden border border-[#d98d55]/25 bg-[#fff6df]/85 backdrop-blur-sm p-8 md:p-12 transition-all duration-500 hover:border-[#ff8a4c]/60 hover:shadow-[0_18px_36px_rgba(211,119,53,0.18)] hover:-translate-y-1">
           {/* Background glow orb */}
-          <div className="absolute -top-20 -right-20 w-64 h-64 rounded-full bg-violet-600/10 blur-3xl pointer-events-none group-hover:bg-violet-500/20 transition-all duration-700" />
+          <div className="absolute -top-20 -right-20 w-64 h-64 rounded-full bg-[#ffb51b]/20 blur-3xl pointer-events-none group-hover:bg-[#ff8a4c]/30 transition-all duration-700" />
           {/* Scan line on hover */}
-          <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-violet-400 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+          <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#ff8a4c] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
           <div className="relative flex flex-col md:flex-row md:items-center gap-8">
             {/* Index number */}
             <div
               className="shrink-0 text-[8rem] md:text-[10rem] font-black leading-none select-none pointer-events-none"
               style={{
-                WebkitTextStroke: '1px rgba(167,139,250,0.2)',
+                WebkitTextStroke: '1px rgba(126,70,34,0.22)',
                 color: 'transparent',
                 transition: 'all 0.4s ease',
               }}
@@ -66,23 +66,23 @@ const FeaturedCard = ({ post, index }: { post: Post; index: number }) => {
 
             <div className="flex-1 min-w-0">
               {/* Featured badge */}
-              <div className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-violet-400 bg-violet-900/30 border border-violet-500/30 px-3 py-1 rounded-full mb-4">
-                <span className="w-1.5 h-1.5 rounded-full bg-violet-400 animate-pulse" />
+              <div className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-[#b45309] bg-[#fff0bd] border border-[#f5b427]/45 px-3 py-1 rounded-full mb-4">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#ff7b54] animate-pulse" />
                 Featured
               </div>
-              <h2 className="text-2xl md:text-3xl font-black text-white group-hover:text-violet-200 transition-colors duration-300 mb-3 leading-snug">
+              <h2 className="text-2xl md:text-3xl font-black text-[#62331d] group-hover:text-[#e65d49] transition-colors duration-300 mb-3 leading-snug">
                 {post.title}
               </h2>
-              <p className="text-gray-400 leading-relaxed mb-5 line-clamp-2">{post.excerpt}</p>
+              <p className="text-[#795943] leading-relaxed mb-5 line-clamp-2">{post.excerpt}</p>
 
               {/* Meta row */}
               <div className="flex flex-wrap items-center gap-4">
-                <span className="text-sm text-gray-500">
+                <span className="text-sm text-[#94715b]">
                   {new Date(post.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
                 </span>
                 <div className="flex flex-wrap gap-2">
                   {post.tags.map(tag => (
-                    <span key={tag} className="text-xs bg-violet-900/40 border border-violet-500/30 text-violet-300 px-2.5 py-0.5 rounded-full">
+                    <span key={tag} className="text-xs bg-[#e5f5c8] border border-[#84a947]/35 text-[#557326] px-2.5 py-0.5 rounded-full">
                       {tag}
                     </span>
                   ))}
@@ -91,7 +91,7 @@ const FeaturedCard = ({ post, index }: { post: Post; index: number }) => {
             </div>
 
             {/* Arrow */}
-            <div className="shrink-0 w-12 h-12 rounded-full border border-white/10 flex items-center justify-center text-gray-500 group-hover:border-violet-400 group-hover:text-violet-300 group-hover:bg-violet-900/30 transition-all duration-300 self-end md:self-auto">
+            <div className="shrink-0 w-12 h-12 rounded-full border border-[#d98d55]/30 flex items-center justify-center text-[#94715b] group-hover:border-[#ff7b54] group-hover:text-[#e65d49] group-hover:bg-[#ffe4c6] transition-all duration-300 self-end md:self-auto">
               ↗
             </div>
           </div>
@@ -117,42 +117,42 @@ const PostCard = ({ post, num, delay = 0 }: { post: Post; num: number; delay?: n
       }}
     >
       <Link to={`/posts/${post.slug}`} className="group block h-full">
-        <div className="relative h-full rounded-2xl overflow-hidden border border-white/8 bg-black/25 backdrop-blur-sm p-7 flex flex-col gap-4 transition-all duration-400 hover:border-violet-500/35 hover:bg-black/40 hover:shadow-[0_8px_30px_rgba(139,92,246,0.12)] hover:-translate-y-1">
+        <div className="relative h-full rounded-2xl overflow-hidden border border-[#d98d55]/22 bg-[#fff8e8]/80 backdrop-blur-sm p-7 flex flex-col gap-4 transition-all duration-400 hover:border-[#ff8a4c]/55 hover:bg-[#fffdf6] hover:shadow-[0_12px_28px_rgba(211,119,53,0.15)] hover:-translate-y-1">
           {/* Corner glow */}
-          <div className="absolute top-0 right-0 w-32 h-32 rounded-full bg-violet-500/5 blur-2xl pointer-events-none group-hover:bg-violet-400/10 transition-all duration-500 translate-x-8 -translate-y-8" />
+          <div className="absolute top-0 right-0 w-32 h-32 rounded-full bg-[#ffcc4d]/25 blur-2xl pointer-events-none group-hover:bg-[#ff8a4c]/25 transition-all duration-500 translate-x-8 -translate-y-8" />
 
           {/* Number */}
           <span
             className="text-5xl font-black leading-none select-none"
-            style={{ WebkitTextStroke: '1px rgba(167,139,250,0.18)', color: 'transparent' }}
+            style={{ WebkitTextStroke: '1px rgba(126,70,34,0.2)', color: 'transparent' }}
           >
             {numStr}
           </span>
 
           {/* Content */}
           <div className="flex-1 flex flex-col">
-            <h2 className="text-lg font-bold text-white group-hover:text-violet-200 transition-colors duration-300 leading-snug mb-2">
+            <h2 className="text-lg font-bold text-[#62331d] group-hover:text-[#e65d49] transition-colors duration-300 leading-snug mb-2">
               {post.title}
             </h2>
-            <p className="text-sm text-gray-500 leading-relaxed line-clamp-3 flex-1">{post.excerpt}</p>
+            <p className="text-sm text-[#795943] leading-relaxed line-clamp-3 flex-1">{post.excerpt}</p>
           </div>
 
           {/* Footer */}
-          <div className="flex items-center justify-between pt-3 border-t border-white/8">
+          <div className="flex items-center justify-between pt-3 border-t border-[#d98d55]/15">
             <div className="flex flex-wrap gap-1.5">
               {post.tags.slice(0, 3).map(tag => (
-                <span key={tag} className="text-[10px] bg-white/8 text-violet-400 px-2 py-0.5 rounded-full border border-violet-500/20">
+                <span key={tag} className="text-[10px] bg-[#e5f5c8] text-[#557326] px-2 py-0.5 rounded-full border border-[#84a947]/25">
                   {tag}
                 </span>
               ))}
             </div>
-            <span className="text-xs text-gray-600 shrink-0 ml-2">
+            <span className="text-xs text-[#94715b] shrink-0 ml-2">
               {new Date(post.date).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
             </span>
           </div>
 
           {/* Bottom glow line on hover */}
-          <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-violet-500/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+          <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-[#ff8a4c] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
         </div>
       </Link>
     </div>
@@ -167,66 +167,27 @@ export const PostsPage = () => {
   const rest = posts?.slice(1) ?? [];
 
   return (
-    <div className="min-h-screen relative">
-      {/* ── Warm blob background — matches Spline scene palette ── */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden" style={{ zIndex: 0 }}>
-        {/* Top-right coral blob */}
-        <div style={{
-          position: 'absolute', top: '-5%', right: '-8%',
-          width: '600px', height: '600px', borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(255,107,107,0.22) 0%, transparent 65%)',
-          filter: 'blur(50px)',
-        }} />
-        {/* Bottom-left amber blob */}
-        <div style={{
-          position: 'absolute', bottom: '5%', left: '-10%',
-          width: '550px', height: '550px', borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(245,158,11,0.18) 0%, transparent 65%)',
-          filter: 'blur(50px)',
-        }} />
-        {/* Center violet blob */}
-        <div style={{
-          position: 'absolute', top: '25%', left: '35%',
-          width: '700px', height: '350px', borderRadius: '50%',
-          background: 'radial-gradient(ellipse, rgba(109,40,217,0.15) 0%, transparent 65%)',
-          filter: 'blur(70px)',
-        }} />
-        {/* Mid teal blob */}
-        <div style={{
-          position: 'absolute', top: '55%', right: '10%',
-          width: '380px', height: '380px', borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(20,184,166,0.12) 0%, transparent 65%)',
-          filter: 'blur(50px)',
-        }} />
-        {/* Pink blob */}
-        <div style={{
-          position: 'absolute', top: '70%', left: '30%',
-          width: '350px', height: '350px', borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(236,72,153,0.10) 0%, transparent 65%)',
-          filter: 'blur(50px)',
-        }} />
-      </div>
-
+    <div className="toyland-page relative">
       <div className="relative max-w-5xl mx-auto px-6 pt-32 pb-32">
 
         {/* ── Page header ────────────────────────────────── */}
         <div className="mb-16 text-center">
-          <p className="text-xs uppercase tracking-[0.3em] text-violet-400 mb-3">Writing</p>
-          <h1 className="text-5xl md:text-7xl font-black text-white mb-4 tracking-tight leading-none">
+          <p className="text-xs uppercase tracking-[0.3em] mb-3" style={{ color: 'rgba(211,119,53,0.75)' }}>Writing</p>
+          <h1 className="text-5xl md:text-7xl font-black mb-4 tracking-tight leading-none" style={{ color: '#3d1f10' }}>
             Tech{' '}
             <span
               className="glitch"
               data-text="Posts"
-              style={{ color: '#a78bfa' }}
+              style={{ color: '#e07a3a' }}
             >
               Posts
             </span>
           </h1>
-          <p className="text-gray-500 max-w-md mx-auto">
+          <p className="max-w-md mx-auto" style={{ color: '#6b4530' }}>
             Deep dives into backend engineering, distributed systems, and fintech infrastructure.
           </p>
           {/* Divider */}
-          <div className="mt-8 w-24 h-px bg-gradient-to-r from-transparent via-violet-400 to-transparent mx-auto" />
+          <div className="mt-8 w-24 h-px bg-gradient-to-r from-transparent via-[#e07a3a] to-transparent mx-auto" />
         </div>
 
         {/* ── Loading ─────────────────────────────────────── */}
@@ -265,7 +226,7 @@ export const PostsPage = () => {
 
         {/* Count line */}
         {posts && posts.length > 0 && (
-          <p className="text-center text-xs text-gray-700 mt-16 tracking-widest uppercase">
+          <p className="text-center text-xs mt-16 tracking-widest uppercase" style={{ color: '#8b5a40' }}>
             {posts.length} article{posts.length !== 1 ? 's' : ''} published
           </p>
         )}

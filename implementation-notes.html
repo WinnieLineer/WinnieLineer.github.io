@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head><meta charset="utf-8"><title>Implementation Notes</title></head>
+  <body>
+    <h1>Implementation Notes</h1>
+    <section>
+      <h2>Design decisions</h2>
+      <ul>
+        <li>將使用者提供的三個網址都加入 Attempts，因為清單實際包含三個專案。</li>
+        <li>作品排序採用使用者指定順序：Daily Diet 第一、Asset Insights 第二、Clock for Phone 最後；HeartSync 排在 Asset Insights 之後。</li>
+        <li>Attempts、Posts、Post Detail 與 Playground 共用 Toyland 視覺語言：暖桃色漸層、圓形裝飾、奶油色卡片、珊瑚／芥黃／草綠強調色與深棕字色。</li>
+        <li>新增的縮圖採用本機 SVG 插畫，保持快速載入、可在各尺寸清楚呈現，並避免外部圖片相依。</li>
+        <li>Microsoft Clarity 在全域 index.html 的 head 載入，確保 SPA 所有路由都能被追蹤。</li>
+      </ul>
+      <h2>Deviations</h2>
+      <p>無。</p>
+      <h2>Tradeoffs</h2>
+      <p>暫用代表性插畫而非各專案實際畫面截圖，以避免增加圖片檔案體積與外部擷取流程。</p>
+      <h2>Open questions</h2>
+      <p>無。</p>
+    </section>
+  </body>
+</html>

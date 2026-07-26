@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" role="img" aria-labelledby="title desc">
+  <title id="title">Clock for Phone preview</title>
+  <desc id="desc">A mobile phone displaying an analog clock.</desc>
+  <defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#eff6ff"/><stop offset="1" stop-color="#b9c9ff"/></linearGradient><filter id="shadow"><feDropShadow dx="0" dy="14" stdDeviation="16" flood-color="#1e3a8a" flood-opacity=".25"/></filter></defs>
+  <rect width="800" height="500" rx="40" fill="url(#bg)"/>
+  <rect x="292" y="105" width="216" height="328" rx="32" fill="#172554" filter="url(#shadow)"/>
+  <rect x="307" y="137" width="186" height="264" rx="18" fill="#dbeafe"/>
+  <circle cx="400" cy="269" r="78" fill="#fff" stroke="#5b7cfa" stroke-width="8"/>
+  <g stroke="#1e3a8a" stroke-linecap="round"><path d="M400 212v59l41 26" stroke-width="10"/><path d="M400 205v10M400 323v10M336 269h10M454 269h10" stroke-width="6"/></g>
+  <circle cx="400" cy="269" r="8" fill="#5b7cfa"/>
+  <rect x="364" y="119" width="72" height="8" rx="4" fill="#93c5fd"/>
+  <text x="400" y="83" text-anchor="middle" fill="#1e3a8a" font-family="system-ui, sans-serif" font-size="38" font-weight="700">Clock for Phone</text>
+</svg>

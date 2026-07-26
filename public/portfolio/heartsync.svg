@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" role="img" aria-labelledby="title desc">
+  <title id="title">HeartSync preview</title>
+  <desc id="desc">Two hearts balanced on a scale.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fff1f5"/><stop offset="1" stop-color="#f9b6cc"/></linearGradient>
+    <filter id="shadow"><feDropShadow dx="0" dy="12" stdDeviation="12" flood-color="#9d174d" flood-opacity=".2"/></filter>
+  </defs>
+  <rect width="800" height="500" rx="40" fill="url(#bg)"/>
+  <g filter="url(#shadow)" stroke="#9d174d" stroke-width="15" stroke-linecap="round" stroke-linejoin="round" fill="none">
+    <path d="M400 112v203M255 315h290M400 315l-90 95M400 315l90 95"/>
+    <path d="M180 242h150l-75-86zM470 242h150l-75-86z"/>
+  </g>
+  <g fill="#e879a8"><path d="M255 187c-25-40-92-8-43 35l43 38 43-38c49-43-18-75-43-35z"/><path d="M545 187c-25-40-92-8-43 35l43 38 43-38c49-43-18-75-43-35z"/></g>
+  <text x="400" y="83" text-anchor="middle" fill="#9d174d" font-family="system-ui, sans-serif" font-size="38" font-weight="700">HeartSync</text>
+</svg>
